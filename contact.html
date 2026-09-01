@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offerte aanvragen – Normly</title>
+  <meta name="description" content="Vraag een vrijblijvende offerte aan voor rapportage-automatisering, documentdigitalisering of systeemintegratie.">
+  <link rel="canonical" href="https://verkoopjeiphone.github.io/normly/contact.html">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Direct naar inhoud</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Normly</a>
+      <button class="nav-toggle" aria-label="Menu openen" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="main-nav" id="main-nav" aria-label="Hoofdmenu">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="diensten.html">Diensten</a></li>
+          <li><a href="over-ons.html">Over ons</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html" class="btn" aria-current="page">Offerte aanvragen</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Vraag een offerte aan</h1>
+        <p class="lead">Vertel ons kort waar je nu tegenaan loopt en waar je hulp bij zoekt. We nemen zo snel mogelijk contact met je op.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="form-heading">
+      <div class="container">
+        <h2 id="form-heading" class="visually-hidden">Offerteformulier</h2>
+        <div class="form-wrap">
+          <!--
+            TODO (Stan): vervang VERVANG_MET_JOUW_FORM_ID hieronder door je
+            eigen Formspree form-ID (aan te maken op formspree.io) zodra je
+            die hebt. Zolang dat niet gebeurd is, komen inzendingen nergens aan.
+          -->
+          <form action="https://formspree.io/f/VERVANG_MET_JOUW_FORM_ID" method="POST">
+            <div class="form-field">
+              <label for="name">Naam</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-field">
+              <label for="email">E-mailadres</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-field">
+              <label for="company">Bedrijfsnaam</label>
+              <input type="text" id="company" name="company">
+            </div>
+            <div class="form-field">
+              <label for="message">Waar loop je tegenaan?</label>
+              <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+            <button type="submit" class="btn">Verstuur aanvraag</button>
+            <p class="form-note">We gebruiken je gegevens alleen om contact met je op te nemen over je aanvraag.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="logo" style="margin:0 0 .5rem;">Normly</p>
+        <p>Rapportage-automatisering, documentdigitalisering en systeemintegratie voor het MKB.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footermenu">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="diensten.html">Diensten</a></li>
+          <li><a href="over-ons.html">Over ons</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 Normly. Alle rechten voorbehouden.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

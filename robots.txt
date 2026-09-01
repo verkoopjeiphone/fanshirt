@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://verkoopjeiphone.github.io/normly/sitemap.xml
