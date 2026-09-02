@@ -19,6 +19,10 @@
   --color-bg: #ffffff;
   --color-bg-alt: #f8fafc;
   --color-border: #e2e8f0;
+  --color-dark: #0f172a;
+  --color-dark-alt: #1e293b;
+  --color-on-dark: #f8fafc;
+  --color-on-dark-muted: #cbd5e1;
   --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --max-width: 1160px;
   --radius: 8px;
@@ -313,10 +317,44 @@ p {
    Hero
    ========================= */
 .hero {
-  padding: 4.5rem 0 4rem;
-  background: linear-gradient(180deg, var(--color-bg-alt) 0%, var(--color-bg) 100%);
-  border-bottom: 1px solid var(--color-border);
+  padding: 5rem 0 4.5rem;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.25), transparent 45%),
+    linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #0f172a 100%);
   overflow: hidden;
+}
+
+.hero h1,
+.hero .eyebrow ~ h1 {
+  color: #fff;
+}
+
+.hero .eyebrow {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fde3b8;
+}
+
+.hero p.lead {
+  color: #dbe4fb;
+}
+
+.hero .form-note {
+  color: #b9c7ea;
+}
+
+.hero .btn-secondary {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.hero .btn-secondary:hover,
+.hero .btn-secondary:focus {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.highlight {
+  color: #fde3b8;
 }
 
 .hero-grid {
@@ -359,7 +397,7 @@ p {
 
 .page-hero {
   padding: 3.5rem 0;
-  background: linear-gradient(180deg, var(--color-bg-alt) 0%, var(--color-bg) 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg) 70%);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -381,6 +419,14 @@ p {
 
 .section-alt {
   background: var(--color-bg-alt);
+}
+
+.section-tint-blue {
+  background: var(--color-primary-light);
+}
+
+.section-tint-amber {
+  background: var(--color-accent-light);
 }
 
 .section-header {
@@ -423,6 +469,7 @@ p {
 .card {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
   border-radius: var(--radius-lg);
   padding: 2rem;
   display: flex;
@@ -431,9 +478,25 @@ p {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+.card.accent-amber {
+  border-top-color: var(--color-accent);
+}
+
+.card.accent-blue {
+  border-top-color: var(--color-primary);
+}
+
 .card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+}
+
+.card:hover .icon-circle {
+  transform: scale(1.08);
+}
+
+.icon-circle {
+  transition: transform 0.2s ease;
 }
 
 .card h3 {
@@ -743,4 +806,115 @@ p {
   border-top: 1px solid var(--color-border);
   font-size: 0.9rem;
   color: var(--color-text-muted);
+}
+
+/* =========================
+   Donkere sectie (derde kleur, contrastblok)
+   ========================= */
+.section-dark {
+  background: var(--color-dark);
+  color: var(--color-on-dark);
+}
+
+.section-dark h2,
+.section-dark h3 {
+  color: #fff;
+}
+
+.section-dark p {
+  color: var(--color-on-dark-muted);
+}
+
+.section-dark .icon-circle {
+  background: rgba(217, 119, 6, 0.18);
+  color: #fbbf6d;
+}
+
+.section-dark .usp-item h3,
+.section-dark .card h3 {
+  color: #fff;
+}
+
+/* =========================
+   "Voor wie" / uitgelicht tekstblok
+   ========================= */
+.lead-block {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  max-width: 780px;
+  background: var(--color-bg-alt);
+  border-left: 4px solid var(--color-accent);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius);
+}
+
+.section-dark .lead-block {
+  background: var(--color-dark-alt);
+  border-left-color: var(--color-accent);
+  color: var(--color-on-dark-muted);
+}
+
+/* =========================
+   "Wat je krijgt" checklist
+   ========================= */
+.check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 640px;
+}
+
+.check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.check-list .check-icon {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--color-accent-light);
+  color: var(--color-accent-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.check-list .check-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.check-list p {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* =========================
+   Scroll-reveal animatie (progressive enhancement)
+   ========================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
