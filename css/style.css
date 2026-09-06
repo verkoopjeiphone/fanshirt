@@ -560,47 +560,32 @@ p {
    ========================= */
 .founder {
   display: grid;
-  grid-template-columns: 17rem 1fr;
-  gap: 3rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
   align-items: center;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .founder {
     grid-template-columns: 1fr;
   }
 
   .founder-photo-wrap {
-    max-width: 16rem;
-    margin: 0 auto;
+    order: -1;
   }
 }
 
 .founder-photo-wrap {
-  position: relative;
-}
-
-.founder-photo-wrap::before {
-  content: "";
-  position: absolute;
-  top: 1.1rem;
-  left: 1.1rem;
-  width: 100%;
-  height: 100%;
-  background: var(--color-accent-light);
   border-radius: var(--radius-lg);
-  z-index: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
 }
 
 .founder-avatar {
-  position: relative;
-  z-index: 1;
   display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
 }
 
 .founder .eyebrow {
@@ -608,7 +593,12 @@ p {
 }
 
 .founder h3 {
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+}
+
+.founder h3 .accent-name {
+  color: var(--color-primary);
 }
 
 .founder p {
@@ -616,7 +606,33 @@ p {
 }
 
 .founder p:last-child {
-  margin-bottom: 0;
+  margin-bottom: 1.75rem;
+}
+
+.founder-stats {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.founder-stat .num {
+  display: block;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.founder-stat:nth-child(2) .num {
+  color: var(--color-primary);
+}
+
+.founder-stat .label {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-weight: 600;
 }
 
 /* CTA-band */
