@@ -16,9 +16,9 @@
   --color-text: #1f2937;
   --color-text-light: #4b5563;
   --color-text-muted: #6b7280;
-  --color-bg: #ffffff;
-  --color-bg-alt: #f8fafc;
-  --color-border: #e2e8f0;
+  --color-bg: #f4f6f9;
+  --color-bg-alt: #e9edf3;
+  --color-border: #dbe1ea;
   --color-dark: #0f172a;
   --color-dark-alt: #1e293b;
   --color-on-dark: #f8fafc;
@@ -584,7 +584,7 @@ p {
 .founder-avatar {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 11 / 10;
   object-fit: cover;
 }
 
