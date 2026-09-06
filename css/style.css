@@ -585,8 +585,51 @@ p {
 
 .steps {
   display: grid;
-  gap: 1.75rem;
+  gap: 2.25rem;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  counter-reset: step;
+  position: relative;
+}
+
+.steps > div {
+  position: relative;
+  z-index: 1;
+}
+
+.steps .icon-circle {
+  position: relative;
+}
+
+.steps .icon-circle::after {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--color-dark);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg);
+}
+
+@media (min-width: 860px) {
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 1.625rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-border);
+    z-index: 0;
+  }
 }
 
 /* =========================
