@@ -24,7 +24,7 @@
   --color-on-dark: #f8fafc;
   --color-on-dark-muted: #cbd5e1;
   --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --max-width: 1160px;
+  --max-width: 1240px;
   --radius: 8px;
   --radius-lg: 16px;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
@@ -69,11 +69,15 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-  font-size: clamp(2rem, 4vw, 2.85rem);
+  font-size: clamp(2.15rem, 4.4vw, 3.35rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 800;
 }
 
 h2 {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  letter-spacing: -0.015em;
 }
 
 h3 {
@@ -318,7 +322,7 @@ p {
    Hero
    ========================= */
 .hero {
-  padding: 5rem 0 4.5rem;
+  padding: 7rem 0 6.5rem;
   background:
     radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.25), transparent 45%),
     linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #0f172a 100%);
@@ -356,6 +360,10 @@ p {
 
 .highlight {
   color: #fde3b8;
+  text-decoration: underline;
+  text-decoration-color: #f59e0b;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
 }
 
 .hero-grid {
@@ -397,7 +405,7 @@ p {
 }
 
 .page-hero {
-  padding: 3.5rem 0;
+  padding: 4.5rem 0;
   background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg) 70%);
   border-bottom: 1px solid var(--color-border);
 }
@@ -415,7 +423,7 @@ p {
    Secties
    ========================= */
 .section {
-  padding: 4.5rem 0;
+  padding: 6rem 0;
 }
 
 .section-alt {
@@ -432,7 +440,7 @@ p {
 
 .section-header {
   max-width: 640px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .section-header.center {
@@ -570,8 +578,8 @@ p {
 }
 
 .founder-avatar {
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
@@ -581,6 +589,7 @@ p {
   font-weight: 800;
   font-size: 1.4rem;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .founder h3 {
@@ -599,7 +608,7 @@ p {
 .cta-band {
   background: var(--color-primary-dark);
   color: #fff;
-  padding: 3.5rem 0;
+  padding: 4.5rem 0;
   text-align: center;
 }
 
@@ -760,8 +769,8 @@ p {
 .site-footer {
   background: var(--color-bg-alt);
   border-top: 1px solid var(--color-border);
-  padding: 3.5rem 0 2rem;
-  margin-top: 4rem;
+  padding: 4rem 0 2rem;
+  margin-top: 5rem;
 }
 
 .footer-grid {
