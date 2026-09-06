@@ -433,6 +433,10 @@ p {
   padding-top: 1.5rem;
 }
 
+.section-compact {
+  padding: 3rem 0;
+}
+
 .section-alt {
   background: var(--color-bg-alt);
 }
