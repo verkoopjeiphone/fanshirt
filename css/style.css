@@ -408,6 +408,14 @@ p {
   position: relative;
 }
 
+.hero-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.35);
+}
+
 .page-hero {
   padding: 3rem 0 2rem;
   background: var(--color-bg);
