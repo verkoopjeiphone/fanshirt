@@ -2,6 +2,17 @@
 // Mobiele navigatie + lichte fade-in-animatie bij scrollen.
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Dezelfde visuele huisstijl als de homepage op alle interne pagina's.
+  var currentPage = window.location.pathname.split("/").pop();
+  var isHome = currentPage === "" || currentPage === "index.html";
+  if (!isHome && !document.querySelector('link[data-normly-brand]')) {
+    var brandStyles = document.createElement("link");
+    brandStyles.rel = "stylesheet";
+    brandStyles.href = "css/brand-pages.css";
+    brandStyles.dataset.normlyBrand = "true";
+    document.head.appendChild(brandStyles);
+  }
+
   var toggle = document.querySelector(".nav-toggle");
   var nav = document.getElementById("main-nav");
 
