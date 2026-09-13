@@ -2,17 +2,6 @@
 // Mobiele navigatie + lichte fade-in-animatie bij scrollen.
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Dezelfde visuele huisstijl als de homepage op alle interne pagina's.
-  var currentPage = window.location.pathname.split("/").pop();
-  var isHome = currentPage === "" || currentPage === "index.html";
-  if (!isHome && !document.querySelector('link[data-normly-brand]')) {
-    var brandStyles = document.createElement("link");
-    brandStyles.rel = "stylesheet";
-    brandStyles.href = "css/brand-pages.css";
-    brandStyles.dataset.normlyBrand = "true";
-    document.head.appendChild(brandStyles);
-  }
-
   var toggle = document.querySelector(".nav-toggle");
   var nav = document.getElementById("main-nav");
 
@@ -20,6 +9,15 @@ document.addEventListener("DOMContentLoaded", function () {
     toggle.addEventListener("click", function () {
       var isOpen = nav.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      toggle.setAttribute("aria-label", isOpen ? "Menu sluiten" : "Menu openen");
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && nav.classList.contains("is-open")) {
+        nav.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Menu openen");
+        toggle.focus();
+      }
     });
   }
 
@@ -42,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
     },
-    { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    { threshold: 0, rootMargin: "0px 0px -40px 0px" }
   );
 
   revealEls.forEach(function (el) {
