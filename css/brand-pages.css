@@ -59,8 +59,8 @@ p{color:var(--brand-muted);line-height:1.72;}
 .card-link:hover{text-decoration:none;}
 
 .pain-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 3rem;max-width:920px;}
-.pain-list li{color:#43566d;padding:1.15rem 0;border-bottom:1px solid var(--brand-line);}
-.pain-list li::before{background:var(--brand-blue);}
+.pain-list li{color:#43566d;padding:1.15rem 0 1.15rem 1.4rem;border-bottom:1px solid var(--brand-line);}
+.pain-list li::before{background:var(--brand-blue);top:calc(1.15rem + .8em - .25rem);}
 .steps{gap:0;border-top:1px solid var(--brand-line);}
 .steps>div{background:#fff;border:0;border-bottom:1px solid var(--brand-line);border-radius:0;box-shadow:none;padding:1.7rem 1.5rem 1.8rem;}
 .steps h3{font-weight:750;}
