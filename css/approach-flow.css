@@ -1,0 +1,19 @@
+/* Shared approach flow for Home and Services. */
+.approach-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;list-style:none;margin:0;padding:0;}
+.approach-flow>li{position:relative;min-width:0;padding:0;}
+.approach-flow>li:not(:last-child)::before{content:"";position:absolute;top:25px;left:68px;right:-14px;height:2px;background:#c9d9ed;}
+.approach-flow>li:not(:last-child)::after{content:"";position:absolute;top:21px;right:-14px;width:10px;height:10px;border-top:2px solid #7898bf;border-right:2px solid #7898bf;transform:rotate(45deg);}
+.approach-flow .flow-number{display:flex;align-items:center;justify-content:center;width:52px;height:52px;margin:0 0 1.5rem;border:1px solid #c9d9ed;border-radius:50%;background:#edf4ff;color:#245da6;font-family:inherit;font-size:1rem;font-style:normal;font-weight:700;line-height:1;}
+.approach-flow>li:last-child .flow-number{background:#122640;border-color:#122640;color:#fff;}
+.approach-flow h3{margin:0 0 .75rem;color:#122640;font-size:1.25rem;font-weight:750;line-height:1.3;}
+.approach-flow p{margin:0;color:#526780;font-size:1rem;line-height:1.75;max-width:28ch;}
+@media(max-width:800px){
+.approach-flow{grid-template-columns:1fr;gap:0;}
+.approach-flow>li{min-height:126px;padding:2px 0 2rem 76px;}
+.approach-flow>li:last-child{min-height:0;padding-bottom:0;}
+.approach-flow .flow-number{position:absolute;left:0;top:0;margin:0;}
+.approach-flow>li:not(:last-child)::before{top:64px;bottom:14px;left:25px;right:auto;width:2px;height:auto;}
+.approach-flow>li:not(:last-child)::after{top:auto;bottom:15px;left:21px;right:auto;transform:rotate(135deg);}
+.approach-flow h3{margin-top:.55rem;}
+.approach-flow p{max-width:48ch;}
+}
