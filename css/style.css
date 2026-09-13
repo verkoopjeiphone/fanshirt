@@ -724,14 +724,6 @@ p {
   font-weight: 600;
 }
 
-.card.accent-amber .card-link {
-  color: var(--color-accent-dark);
-}
-
-.card.accent-teal .card-link {
-  color: var(--color-teal-dark);
-}
-
 .usp-grid {
   display: grid;
   gap: 1px;
