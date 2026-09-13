@@ -648,7 +648,6 @@ p {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  counter-reset: card-num;
 }
 
 @media (max-width: 700px) {
@@ -658,37 +657,15 @@ p {
 }
 
 .card {
-  counter-increment: card-num;
   position: relative;
   background: #fff;
   border: none;
   border-radius: 0;
-  padding: 2.75rem;
+  padding: 2.25rem 2.5rem;
   display: flex;
   flex-direction: column;
   box-shadow: none;
   transition: background 0.2s ease;
-}
-
-.card::before {
-  content: counter(card-num, decimal-leading-zero);
-  position: absolute;
-  top: 1.9rem;
-  right: 2rem;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 500;
-  font-size: 2.1rem;
-  line-height: 1;
-  color: var(--color-primary);
-}
-
-.card.accent-amber::before {
-  color: var(--color-accent-dark);
-}
-
-.card.accent-teal::before {
-  color: var(--color-teal-dark);
 }
 
 .card:hover {
@@ -701,7 +678,6 @@ p {
 
 .card h3 {
   margin-top: 0;
-  padding-right: 3rem;
 }
 
 .card .card-link {
@@ -719,8 +695,23 @@ p {
 
 .usp-grid {
   display: grid;
-  gap: 1.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  grid-template-columns: repeat(2, 1fr);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+@media (max-width: 700px) {
+  .usp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.usp-item {
+  background: var(--color-dark-alt);
+  padding: 2.25rem 2.5rem;
 }
 
 .usp-item h3 {
@@ -1191,11 +1182,6 @@ p {
 .section-dark .usp-item h3,
 .section-dark .card h3 {
   color: #fff;
-}
-
-.section-dark .usp-item {
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--color-dark-alt);
 }
 
 /* =========================
