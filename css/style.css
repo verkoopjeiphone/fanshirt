@@ -13,6 +13,9 @@
   --color-accent: #d97706;
   --color-accent-dark: #b45309;
   --color-accent-light: #fef3e2;
+  --color-teal: #0f766e;
+  --color-teal-dark: #0b5852;
+  --color-teal-light: #e3f4f2;
   --color-text: #1f2937;
   --color-text-light: #4b5563;
   --color-text-muted: #6b7280;
@@ -322,14 +325,17 @@ p {
   color: var(--color-accent-dark);
 }
 
+.icon-circle.teal {
+  background: var(--color-teal-light);
+  color: var(--color-teal-dark);
+}
+
 /* =========================
    Hero
    ========================= */
 .hero {
   padding: 7rem 0 6.5rem;
-  background:
-    radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.25), transparent 45%),
-    linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #0f172a 100%);
+  background: var(--color-primary-dark);
   overflow: hidden;
 }
 
@@ -418,9 +424,7 @@ p {
 
 .page-hero {
   padding: 3.5rem 0 3rem;
-  background:
-    radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.25), transparent 45%),
-    linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 55%, #0f172a 100%);
+  background: var(--color-primary-dark);
   overflow: hidden;
 }
 
@@ -549,6 +553,10 @@ p {
 
 .card.accent-blue {
   border-top-color: var(--color-primary);
+}
+
+.card.accent-teal {
+  border-top-color: var(--color-teal);
 }
 
 .card:hover {
