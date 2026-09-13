@@ -668,6 +668,12 @@ p {
   transition: background 0.2s ease;
 }
 
+/* De losse lijn-icoontjes lazen onduidelijk zonder achtergrond — weg ermee,
+   de kop + cijferloze structuur draagt de kaart nu in zijn eentje. */
+.card .icon-circle {
+  display: none;
+}
+
 .card:hover {
   background: var(--color-bg);
 }
@@ -741,14 +747,24 @@ p {
 
 .steps {
   display: grid;
-  gap: 2.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  position: relative;
+  gap: 1px;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 .steps > div {
   position: relative;
-  z-index: 1;
+  background: #fff;
+  padding: 2.25rem 2.5rem;
 }
 
 .steps > div:nth-child(1) .step-number { color: var(--color-primary); }
@@ -1096,7 +1112,7 @@ p {
   background: var(--color-dark);
   border-top: none;
   padding: 4.5rem 0 2rem;
-  margin-top: 5rem;
+  margin-top: 0;
   color: var(--color-on-dark-muted);
 }
 
