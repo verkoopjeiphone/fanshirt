@@ -429,7 +429,21 @@ p {
   position: relative;
 }
 
-/* Report-preview visual (vervangt de stock-illustratie) */
+/* Hero-foto (vervangt de abstracte illustratie/mockup) */
+.hero-photo-wrap {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.35);
+}
+
+.hero-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+/* Report-preview visual (elders herbruikbaar; niet meer op de homepage-hero) */
 .report-card {
   background: #fff;
   border-radius: var(--radius-lg);
@@ -554,6 +568,25 @@ p {
   margin-bottom: 1rem;
   background: none;
   color: #fdd9a8;
+}
+
+.page-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .page-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-hero-grid .hero-visual {
+    order: -1;
+    max-width: 340px;
+    margin: 0 auto;
+  }
 }
 
 .page-hero p.lead {
@@ -887,6 +920,39 @@ p {
   font-weight: 600;
 }
 
+/* Founder-teaser (homepage) */
+.founder-teaser {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.founder-teaser-photo {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.founder-teaser h2 {
+  margin-bottom: 0.6rem;
+}
+
+.founder-teaser p {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 640px) {
+  .founder-teaser {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 /* CTA-band */
 .cta-band {
   background: var(--color-primary-dark);
@@ -1063,6 +1129,40 @@ p {
 .form-note {
   font-size: 0.9rem;
   color: var(--color-text-light);
+}
+
+.contact-founder {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-founder img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.contact-founder p {
+  margin: 0;
+}
+
+.contact-founder-name {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 1.05rem;
+}
+
+.contact-founder-note {
+  font-size: 0.88rem;
 }
 
 .next-steps {
