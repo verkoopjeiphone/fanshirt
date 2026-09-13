@@ -1,85 +1,17 @@
 <svg width="900" height="700" viewBox="0 0 900 700" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="90" y1="70" x2="810" y2="650" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F8FBFF"/>
-      <stop offset="1" stop-color="#EAF3FF"/>
-    </linearGradient>
-    <linearGradient id="blue" x1="170" y1="140" x2="720" y2="560" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#60A5FA"/>
-      <stop offset="1" stop-color="#2563EB"/>
-    </linearGradient>
-    <linearGradient id="cyan" x1="220" y1="120" x2="700" y2="600" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#67E8F9"/>
-      <stop offset="1" stop-color="#0891B2"/>
-    </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#173B68" flood-opacity="0.16"/>
-    </filter>
-  </defs>
-  <rect x="30" y="30" width="840" height="640" rx="38" fill="url(#bg)"/>
-  <circle cx="735" cy="135" r="105" fill="#DBEAFE" opacity="0.8"/>
-  <circle cx="170" cy="575" r="120" fill="#CFFAFE" opacity="0.55"/>
-
-  <g opacity="0.35">
-    <path d="M120 350H780" stroke="#93C5FD" stroke-width="1" stroke-dasharray="5 8"/>
-    <path d="M450 85V615" stroke="#93C5FD" stroke-width="1" stroke-dasharray="5 8"/>
-  </g>
-
-  <g stroke="#60A5FA" stroke-width="5" stroke-linecap="round" opacity="0.72">
-    <path d="M245 235L405 350"/>
-    <path d="M655 235L495 350"/>
-    <path d="M245 465L405 350"/>
-    <path d="M655 465L495 350"/>
-  </g>
-  <g stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 9">
-    <path d="M245 235L655 465"/>
-    <path d="M655 235L245 465"/>
-  </g>
-
-  <g filter="url(#shadow)">
-    <rect x="330" y="275" width="240" height="150" rx="24" fill="#0B192B"/>
-    <rect x="352" y="300" width="54" height="8" rx="4" fill="#60A5FA"/>
-    <rect x="352" y="325" width="126" height="10" rx="5" fill="#334B69"/>
-    <rect x="352" y="350" width="185" height="10" rx="5" fill="#1E3857"/>
-    <rect x="352" y="380" width="82" height="20" rx="10" fill="#2563EB"/>
-    <circle cx="528" cy="390" r="8" fill="#22D3EE"/>
-  </g>
-
-  <g filter="url(#shadow)">
-    <rect x="135" y="175" width="190" height="120" rx="22" fill="white"/>
-    <circle cx="175" cy="215" r="19" fill="#EAF2FF"/>
-    <path d="M166 215L173 222L185 208" stroke="#2563EB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="208" y="207" width="78" height="9" rx="4.5" fill="#0B192B"/>
-    <rect x="166" y="252" width="120" height="8" rx="4" fill="#D7E3F2"/>
-    <rect x="166" y="268" width="88" height="8" rx="4" fill="#E5ECF5"/>
-  </g>
-
-  <g filter="url(#shadow)">
-    <rect x="575" y="175" width="190" height="120" rx="22" fill="white"/>
-    <circle cx="615" cy="215" r="19" fill="#E6FBFE"/>
-    <path d="M605 215H625M615 205V225" stroke="#0891B2" stroke-width="4" stroke-linecap="round"/>
-    <rect x="648" y="207" width="78" height="9" rx="4.5" fill="#0B192B"/>
-    <rect x="606" y="252" width="120" height="8" rx="4" fill="#D7E3F2"/>
-    <rect x="606" y="268" width="88" height="8" rx="4" fill="#E5ECF5"/>
-  </g>
-
-  <g filter="url(#shadow)">
-    <rect x="135" y="405" width="190" height="120" rx="22" fill="white"/>
-    <circle cx="175" cy="445" r="19" fill="#EAF2FF"/>
-    <path d="M166 452V438M175 452V432M184 452V442" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/>
-    <rect x="208" y="437" width="78" height="9" rx="4.5" fill="#0B192B"/>
-    <rect x="166" y="482" width="120" height="8" rx="4" fill="#D7E3F2"/>
-    <rect x="166" y="498" width="88" height="8" rx="4" fill="#E5ECF5"/>
-  </g>
-
-  <g filter="url(#shadow)">
-    <rect x="575" y="405" width="190" height="120" rx="22" fill="white"/>
-    <circle cx="615" cy="445" r="19" fill="#E6FBFE"/>
-    <path d="M605 445H625M615 435V455" stroke="#0891B2" stroke-width="4" stroke-linecap="round"/>
-    <rect x="648" y="437" width="78" height="9" rx="4.5" fill="#0B192B"/>
-    <rect x="606" y="482" width="120" height="8" rx="4" fill="#D7E3F2"/>
-    <rect x="606" y="498" width="88" height="8" rx="4" fill="#E5ECF5"/>
-  </g>
-
-  <circle cx="450" cy="350" r="12" fill="#22D3EE" stroke="white" stroke-width="6"/>
+<defs>
+<linearGradient id="bg" x1="80" y1="60" x2="820" y2="640" gradientUnits="userSpaceOnUse"><stop stop-color="#F9FCFF"/><stop offset="1" stop-color="#EEF6FF"/></linearGradient>
+<linearGradient id="core" x1="330" y1="260" x2="570" y2="440" gradientUnits="userSpaceOnUse"><stop stop-color="#3B82F6"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#17416E" flood-opacity="0.14"/></filter>
+</defs>
+<rect x="30" y="30" width="840" height="640" rx="38" fill="url(#bg)"/>
+<circle cx="760" cy="125" r="115" fill="#DBEAFE" opacity="0.65"/><circle cx="145" cy="580" r="130" fill="#CFFAFE" opacity="0.45"/>
+<g stroke="#8CB9F8" stroke-width="4" stroke-linecap="round" opacity="0.75"><path d="M300 205L385 295"/><path d="M600 205L515 295"/><path d="M300 495L385 405"/><path d="M600 495L515 405"/></g>
+<g stroke="#67E8F9" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 9"><path d="M300 205L600 495"/><path d="M600 205L300 495"/></g>
+<g filter="url(#shadow)"><rect x="315" y="255" width="270" height="190" rx="30" fill="url(#core)"/><circle cx="450" cy="310" r="25" fill="white" opacity="0.96"/><path d="M438 310H462M450 298V322" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/><text x="450" y="360" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="26" font-weight="700">Normly</text><text x="450" y="387" text-anchor="middle" fill="#DBEAFE" font-family="Arial, sans-serif" font-size="13" font-weight="600">Slimmer werken</text><rect x="375" y="408" width="150" height="5" rx="2.5" fill="#93C5FD" opacity="0.7"/></g>
+<g filter="url(#shadow)"><rect x="105" y="135" width="225" height="145" rx="24" fill="white"/><circle cx="145" cy="177" r="22" fill="#EAF2FF"/><path d="M134 190V175M145 190V165M156 190V171" stroke="#2563EB" stroke-width="4" stroke-linecap="round"/><text x="180" y="177" fill="#0B192B" font-family="Arial, sans-serif" font-size="15" font-weight="700">Rapportages</text><text x="180" y="198" fill="#64748B" font-family="Arial, sans-serif" font-size="11">Automatisch verwerkt</text><rect x="135" y="224" width="150" height="8" rx="4" fill="#DCE7F5"/><rect x="135" y="242" width="110" height="8" rx="4" fill="#E8EEF6"/></g>
+<g filter="url(#shadow)"><rect x="570" y="135" width="225" height="145" rx="24" fill="white"/><circle cx="610" cy="177" r="22" fill="#E8FBFE"/><path d="M602 166H618V188H602Z M605 171H615M605 177H615M605 183H612" stroke="#0891B2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="645" y="177" fill="#0B192B" font-family="Arial, sans-serif" font-size="15" font-weight="700">Documenten</text><text x="645" y="198" fill="#64748B" font-family="Arial, sans-serif" font-size="11">Digitaal &amp; vindbaar</text><rect x="600" y="224" width="150" height="8" rx="4" fill="#DCE7F5"/><rect x="600" y="242" width="110" height="8" rx="4" fill="#E8EEF6"/></g>
+<g filter="url(#shadow)"><rect x="105" y="420" width="225" height="145" rx="24" fill="white"/><circle cx="145" cy="462" r="22" fill="#EAF2FF"/><circle cx="137" cy="454" r="5" fill="#2563EB"/><circle cx="153" cy="470" r="5" fill="#2563EB"/><path d="M141 458L149 466" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/><text x="180" y="462" fill="#0B192B" font-family="Arial, sans-serif" font-size="15" font-weight="700">Systemen</text><text x="180" y="483" fill="#64748B" font-family="Arial, sans-serif" font-size="11">Met elkaar verbonden</text><rect x="135" y="509" width="150" height="8" rx="4" fill="#DCE7F5"/><rect x="135" y="527" width="110" height="8" rx="4" fill="#E8EEF6"/></g>
+<g filter="url(#shadow)"><rect x="570" y="420" width="225" height="145" rx="24" fill="white"/><circle cx="610" cy="462" r="22" fill="#E8FBFE"/><rect x="599" y="452" width="22" height="17" rx="3" stroke="#0891B2" stroke-width="3"/><path d="M599 457H621" stroke="#0891B2" stroke-width="2.5"/><text x="645" y="462" fill="#0B192B" font-family="Arial, sans-serif" font-size="15" font-weight="700">Websites</text><text x="645" y="483" fill="#64748B" font-family="Arial, sans-serif" font-size="11">Modern &amp; passend</text><rect x="600" y="509" width="150" height="8" rx="4" fill="#DCE7F5"/><rect x="600" y="527" width="110" height="8" rx="4" fill="#E8EEF6"/></g>
+<circle cx="450" cy="350" r="9" fill="#67E8F9" stroke="white" stroke-width="5"/>
 </svg>
