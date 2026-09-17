@@ -74,7 +74,7 @@ h1,h2,h3,h4,.logo{font-family:inherit;letter-spacing:-.035em;}
 .cta-band{position:relative;padding:5.8rem 0;background:var(--home-ink);overflow:hidden;}
 .cta-band::after{content:"";position:absolute;width:520px;height:520px;right:-250px;top:-320px;border-radius:50%;border:1px solid rgba(255,255,255,.07);box-shadow:0 0 0 80px rgba(255,255,255,.015);background:none;filter:none;}
 .cta-band .container{position:relative;z-index:1;}
-.cta-band h2{max-width:760px;color:#fff;font-size:clamp(2rem,3.6vw,3rem);font-weight:800;}
+.cta-band h2{max-width:960px;color:#fff;font-size:clamp(2rem,3.6vw,3rem);font-weight:800;text-wrap:balance;}
 .cta-band p{max-width:650px;color:#a9b9ca;line-height:1.75;}
 .cta-band .btn{background:#fff;color:var(--home-ink);box-shadow:none;}
 .cta-band .btn:hover{background:#edf5ff;color:var(--home-blue);}

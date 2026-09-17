@@ -111,7 +111,9 @@ p{color:var(--brand-muted);line-height:1.72;}
 .faq-item,.faq-list details{background:#fff;border:1px solid var(--brand-line);border-radius:10px;}
 .faq-list{max-width:900px;}
 .faq-list details{padding:1.15rem 1.3rem;margin-bottom:.7rem;}
-.faq-list summary{cursor:pointer;font-weight:750;color:var(--brand-ink);}
+/* summary valt buiten de h1..h4-regel hierboven en bleef daardoor als enige
+   op het serif-lettertype hangen; hier gelijkgetrokken met de rest */
+.faq-list summary,.faq-item summary{font-family:inherit;cursor:pointer;font-weight:750;color:var(--brand-ink);letter-spacing:-.02em;}
 .faq-list details[open]{box-shadow:none;}
 .content-narrow{max-width:820px;}
 .content-narrow h2,.content-narrow h3{font-weight:800;margin-top:2.2rem;}
