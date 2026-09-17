@@ -28,7 +28,38 @@
 
 @media(max-width:640px){.hero-process{aspect-ratio:auto;display:grid;grid-template-columns:1fr;gap:.7rem;margin-top:2.6rem;}}
 
-@media(max-width:640px){.process-line,.process-node::after{display:none;}.process-core,.process-node{position:static;transform:none;width:100%;min-height:0;height:auto;}.process-core{order:-1;align-items:flex-start;padding:1rem 1.1rem;background:#fff;}.process-node{padding:.85rem 1rem;}}
+@media(max-width:640px){.process-line{display:none;}.process-core,.process-node{position:static;transform:none;width:100%;min-height:0;height:auto;}.process-core{order:-1;align-items:flex-start;padding:1rem 1.1rem;background:#fff;}.process-node{padding:.85rem 1rem;}}
 
 .process-hero-grid{grid-template-columns:minmax(0,1fr) minmax(440px,.92fr);gap:5.5rem;}
 @media(max-width:1200px){.process-hero-grid{grid-template-columns:1fr;gap:3rem;}}
+
+/* ---- Mobiel: het diagram blijft een flow in plaats van een losse stapel ----
+   Op desktop staan de vier blokken rond de kern met verbindingslijnen. Op een
+   telefoon vallen die lijnen weg, waardoor het een willekeurig lijstje werd.
+   Hieronder loopt de lijn verticaal door, met een pijl tussen elk blok. */
+@media(max-width:640px){
+  .hero-process{gap:1.6rem;}
+  /* relatief voor de verbindingslijn, maar zonder de desktop-offsets
+     (left/top/bottom) die het blok anders opzij duwen */
+  .process-core,.process-node{position:relative;left:auto;right:auto;top:auto;bottom:auto;}
+  .process-core{width:100%;}
+  .process-core::before,
+  .process-node:not(:last-child)::before{
+    content:"";position:absolute;left:50%;bottom:-1.6rem;
+    width:2px;height:1.6rem;transform:translateX(-50%);
+    background:linear-gradient(180deg,rgba(84,161,248,.2),rgba(84,161,248,.75));
+  }
+  .process-core::after,
+  .process-node:not(:last-child)::after{
+    content:"";display:block;position:absolute;
+    /* top/right expliciet terugzetten: de desktopregels per blok zetten die,
+       waardoor de pijl anders midden in de kaart belandt */
+    top:auto;right:auto;left:50%;bottom:-1.15rem;
+    width:8px;height:8px;margin-left:-4px;
+    border:0;border-right:2px solid #7db7ff;border-bottom:2px solid #7db7ff;
+    border-radius:0;background:none;box-shadow:none;
+    transform:rotate(45deg);
+  }
+  /* het laatste blok sluit de flow af: geen lijn, geen pijl, geen stip */
+  .process-node:last-child::after{display:none;}
+}
