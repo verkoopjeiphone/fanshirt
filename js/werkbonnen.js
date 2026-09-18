@@ -158,5 +158,5 @@ document.addEventListener("DOMContentLoaded",()=>{
  $("manageButton").onclick=async()=>{openModal("manageModal");$("manageMessage").textContent="";$("objectCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+"</option>").join("");await employeeRoles()};
  document.querySelectorAll("[data-close-modal]").forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});
  $("hourDate").value=new Date().toISOString().slice(0,10);$("materialAmount").value="1";$("materialUnit").value="stuks";
- if(accessToken)loadProfile().catch(()=>{accessToken="";sessionStorage.removeItem("normly_workbon_access");sessionStorage.removeItem("normly_workbon_user");showLogin()});
+ if(accessToken)loadProfile().catch(e=>{showLogin("Sessie gevonden, maar het Werkbonnen-profiel kon niet worden geladen: "+(e?.message||"onbekende fout"));err($("loginMessage"),"Sessie gevonden, maar het Werkbonnen-profiel kon niet worden geladen: "+(e?.message||"onbekende fout"));console.error("Werkbonnen sessie:",e)});
 });
