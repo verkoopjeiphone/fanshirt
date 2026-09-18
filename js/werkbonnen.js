@@ -4,7 +4,51 @@ const SUPABASE_KEY="sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
 const PHOTO_BUCKET="werkbon-fotos";
 let accessToken=sessionStorage.getItem("normly_workbon_access")||"",sessionUser=JSON.parse(sessionStorage.getItem("normly_workbon_user")||"null"),profile=null,wbRole=null,customers=[],contacts=[],objects=[],employees=[],currentWorkorder=null,signatureCanvas=null,signatureDrawing=false;
 const $=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
-const ROLE_LABELS={monteur:"Monteur",leidinggevende:"Leidinggevende",planner:"Planner",beheerder:"Beheerder"};
+
+const DEMO_INPUTS=[
+ {type:"mail",source:"E-mail",klant:"DEMO-1002",title:"Storing bouwplaatsverlichting",body:"Goedemiddag, op onze bouwplaats aan de westzijde vallen sinds vanochtend meerdere lichtarmaturen uit. Kunnen jullie de voeding en armaturen controleren en de storing oplossen? Graag vandaag als dat lukt.\n\nGroet, Sophie de Ruiter",priority:"hoog",soort:"Storing"},
+ {type:"mail",source:"E-mail",klant:"DEMO-1005",title:"Lekkage kelder De Horizon",body:"Er is een vochtplek ontstaan bij een leidingdoorvoer in de kelder. Willen jullie de oorzaak controleren en indien mogelijk een tijdelijke maatregel uitvoeren? De sleutelhouder kan op locatie komen.\n\nMet vriendelijke groet, Peter Visser",priority:"spoed",soort:"Storing"},
+ {type:"tekening",source:"Tekening",klant:"DEMO-1003",title:"Inspectie laadperron 3",body:"Tekening gemarkeerd met LP-03. Controleer de technische voorzieningen rond het laadperron en noteer eventuele afwijkingen in de werkbon. Meetrapport meenemen.",priority:"normaal",soort:"Inspectie"},
+ {type:"tekening",source:"Tekening",klant:"DEMO-1001",title:"Onderhoud LBK-01",body:"Technische ruimte dak. Luchtbehandelingskast LBK-01. Reinig filters, controleer ventilator en riemaandrijving. Vervang filters indien nodig.",priority:"normaal",soort:"Onderhoud"},
+ {type:"mail",source:"E-mail",klant:"DEMO-1004",title:"Klimaatklacht tweede verdieping",body:"In drie kantoorruimten op de tweede verdieping is het te warm. Graag regeling, sensoren en luchtverdeling controleren. Bel Lisa kort voor aankomst.",priority:"hoog",soort:"Storing"}
+];
+function renderDemoInputs(){
+ const el=$("demoInputs"); if(!el)return;
+ el.innerHTML=DEMO_INPUTS.map((x,i)=>'<article class="input-card"><div class="input-card-head"><span class="input-type">'+esc(x.source)+'</span><span class="priority priority-'+esc(x.priority)+'">'+esc(x.priority)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.body.slice(0,145))+(x.body.length>145?'…':'')+'</p>'+(x.type==='tekening'?'<div class="drawing-mini"><span>TECHNISCHE TEKENING</span><i></i><b></b><em>LP / LBK</em></div>':'<div class="mail-mini"><strong>Van</strong><span>'+esc(x.klant==='DEMO-1002'?'Sophie de Ruiter':x.klant==='DEMO-1005'?'Peter Visser':'Techniek / beheer')+'</span><small>Opdracht ontvangen</small></div>')+'<button class="secondary input-action" data-input-index="'+i+'">Maak werkbon van deze input</button></article>').join('');
+ document.querySelectorAll('.input-action').forEach(b=>b.onclick=()=>createFromDemoInput(Number(b.dataset.inputIndex)));
+}
+async function createFromDemoInput(i){
+ const x=DEMO_INPUTS[i]; if(!x)return;
+ try{
+  const k=customers.find(c=>c.klantnummer===x.klant), cp=contacts.find(c=>c.klant_id===k?.id), o=objects.find(o=>o.klant_id===k?.id);
+  const date=new Date();date.setDate(date.getDate()+1);
+  const p={organisatie_id:profile.organisatie_id,klant_id:k?.id||null,contactpersoon_id:cp?.id||null,object_id:o?.id||null,titel:'DEMO | '+x.title,omschrijving:x.body,soort_werk:x.soort,prioriteit:x.priority,status:'concept',gepland_op:date.toISOString().slice(0,10),aangemaakt_door:profile.id,opmerking_intern:'Bron: '+x.source+'. Demo-voorbeeld: Normly maakt een eerste werkbonvoorstel op basis van de ontvangen input.',factuurstatus:'te_factureren'};
+  const made=await rest('werkbon',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify(p)});
+  await list(); if(made?.[0]?.id)await openWorkorder(made[0].id);
+ }catch(e){err($("accessMessage"),e.message||'Werkbonvoorstel maken mislukt.')}
+}
+function openInputModal(){
+ $("inputMessage").textContent='';
+ $("inputForm").reset();
+ $("inputCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+'</option>').join('');
+ openModal('inputModal');
+}
+async function createFromManualInput(e){
+ e.preventDefault();
+ try{
+  const title=$("inputSubject").value.trim()||'Nieuwe opdracht vanuit input';
+  const body=$("inputBody").value.trim(); if(!body)throw new Error('Vul de inhoud van de opdracht in.');
+  const k=customers.find(c=>c.id===$("inputCustomer").value), cp=contacts.find(c=>c.klant_id===k?.id), o=objects.find(o=>o.klant_id===k?.id);
+  const file=$("inputFile").files?.[0];
+  const lower=(title+' '+body).toLowerCase();
+  const soort=lower.includes('inspect')||lower.includes('tekening')?'Inspectie':lower.includes('onderhoud')||lower.includes('filter')?'Onderhoud':lower.includes('lekk')||lower.includes('storing')||lower.includes('uitval')?'Storing':'Werkzaamheden';
+  const priority=lower.includes('spoed')||lower.includes('vandaag')?'spoed':lower.includes('urgent')||lower.includes('direct')?'hoog':'normaal';
+  const p={organisatie_id:profile.organisatie_id,klant_id:k?.id||null,contactpersoon_id:cp?.id||null,object_id:o?.id||null,titel:'DEMO | '+title,omschrijving:body,soort_werk:soort,prioriteit:priority,status:'concept',aangemaakt_door:profile.id,opmerking_intern:'Bron: '+$("inputType").value+(file?' · Bijlage: '+file.name:'')+'. Demo-voorstel; controleer de voorgestelde gegevens voordat de werkbon wordt ingepland.',factuurstatus:'te_factureren'};
+  const made=await rest('werkbon',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify(p)});
+  closeModal('inputModal');await list();if(made?.[0]?.id)await openWorkorder(made[0].id);
+ }catch(e){err($("inputMessage"),e.message||'Werkbonvoorstel maken mislukt.')}
+}
+\nconst ROLE_LABELS={monteur:"Monteur",leidinggevende:"Leidinggevende",planner:"Planner",beheerder:"Beheerder"};
 const STATUS_LABELS={concept:"Concept",ingepland:"Ingepland",onderweg:"Onderweg",in_uitvoering:"In uitvoering",wacht_op_klant:"Wacht op klant",afgerond:"Afgerond",gefactureerd:"Gefactureerd"};
 const STATUS_ORDER=["concept","ingepland","onderweg","in_uitvoering","wacht_op_klant","afgerond","gefactureerd"];
 const apiHeaders=()=>({apikey:SUPABASE_KEY,Authorization:"Bearer "+accessToken,"Content-Type":"application/json"});
@@ -22,7 +66,7 @@ async function loadProfile(){
  if(!u||!u.actief)throw new Error("Je Normly-account is niet actief of niet gekoppeld.");
  if(!u.organisatie||(u.organisatie.actieve_modules||[]).indexOf("werkbonnen")<0)throw new Error("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");
  const rr=await rest("werkbon_gebruiker?select=rol&gebruiker_id=eq."+encodeURIComponent(u.id));wbRole=rr?.[0]?.rol;if(!wbRole)throw new Error("Je account heeft nog geen Werkbonnen-rol.");
- profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();await refs();await list();return true
+ profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();await refs();renderDemoInputs();await list();return true
 }
 async function refs(){
  [customers,employees]=await Promise.all([
@@ -102,8 +146,8 @@ document.addEventListener("DOMContentLoaded",()=>{
  $("resetButton").onclick=async()=>{const email=$("email").value.trim();if(!email){$("loginMessage").textContent="Vul eerst je e-mailadres in.";return}try{const r=await fetch(SUPABASE_URL+"/auth/v1/recover",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email})});$("loginMessage").textContent=r.ok?"Als dit account bestaat, ontvang je een e-mail om je wachtwoord te wijzigen.":"Wachtwoord resetten is niet gelukt."}catch(e){err($("loginMessage"),"Wachtwoord resetten is niet gelukt.")}};
  $("loginButton").onclick=async()=>{try{$("loginMessage").textContent="Bezig met inloggen...";const s=await authRequest($("email").value.trim(),$("password").value);accessToken=s.access_token;sessionUser=s.user;sessionStorage.setItem("normly_workbon_access",accessToken);sessionStorage.setItem("normly_workbon_user",JSON.stringify(sessionUser));await loadProfile()}catch(e){accessToken="";sessionStorage.removeItem("normly_workbon_access");sessionStorage.removeItem("normly_workbon_user");err($("loginMessage"),e.message||"Inloggen mislukt.")}};
  $("password").onkeydown=e=>{if(e.key==="Enter")$("loginButton").click()};$("logoutButton").onclick=()=>{accessToken="";sessionUser=null;sessionStorage.removeItem("normly_workbon_access");sessionStorage.removeItem("normly_workbon_user");showLogin("Je bent uitgelogd.")};
- $("refreshButton").onclick=async()=>{try{await refs();await list()}catch(e){err($("accessMessage"),e.message||"Verversen mislukt.")}};
- $("newWorkorderButton").onclick=()=>{ $("newForm").reset();$("newMessage").textContent="";renderSelects();openModal("newModal")};
+ $("refreshButton").onclick=async()=>{try{await refs();renderDemoInputs();await list()}catch(e){err($("accessMessage"),e.message||"Verversen mislukt.")}};
+ $("newInputButton").onclick=openInputModal;$("inputForm").onsubmit=createFromManualInput;$("newWorkorderButton").onclick=()=>{ $("newForm").reset();$("newMessage").textContent="";renderSelects();openModal("newModal")};
  $("newCustomer").onchange=dependentSelects;$("newForm").onsubmit=createWorkorder;$("detailSaveBasic").onclick=saveDetail;$("hourForm").onsubmit=addHours;$("materialForm").onsubmit=addMaterial;$("photoFile").onchange=uploadPhoto;$("saveSignature").onclick=saveSignature;$("clearSignature").onclick=setupSignature;
  $("customerForm").onsubmit=createCustomer;$("objectForm").onsubmit=createObject;
  $("manageButton").onclick=async()=>{openModal("manageModal");$("manageMessage").textContent="";$("objectCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+"</option>").join("");await employeeRoles()};
