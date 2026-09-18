@@ -1,96 +1,112 @@
+
 const SUPABASE_URL="https://oycmdwxmlhchftlunbem.supabase.co";
 const SUPABASE_KEY="sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
-
-let supabase=null;
-let profile=null;
-
-const $=id=>document.getElementById(id);
-const loginView=$("loginView"),portalView=$("portalView"),loginMessage=$("loginMessage"),accessMessage=$("accessMessage");
-
-function showLogin(message=""){loginView.hidden=false;portalView.hidden=true;loginMessage.textContent=message}
-function showPortal(){loginView.hidden=true;portalView.hidden=false}
-function setLoginError(message){loginMessage.textContent=message;loginMessage.classList.add("error")}
+const PHOTO_BUCKET="werkbon-fotos";
+let accessToken=sessionStorage.getItem("normly_workbon_access")||"",sessionUser=JSON.parse(sessionStorage.getItem("normly_workbon_user")||"null"),profile=null,wbRole=null,customers=[],contacts=[],objects=[],employees=[],currentWorkorder=null,signatureCanvas=null,signatureDrawing=false;
+const $=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+const ROLE_LABELS={monteur:"Monteur",leidinggevende:"Leidinggevende",planner:"Planner",beheerder:"Beheerder"};
+const STATUS_LABELS={concept:"Concept",ingepland:"Ingepland",onderweg:"Onderweg",in_uitvoering:"In uitvoering",wacht_op_klant:"Wacht op klant",afgerond:"Afgerond",gefactureerd:"Gefactureerd"};
+const STATUS_ORDER=["concept","ingepland","onderweg","in_uitvoering","wacht_op_klant","afgerond","gefactureerd"];
+const apiHeaders=()=>({apikey:SUPABASE_KEY,Authorization:"Bearer "+accessToken,"Content-Type":"application/json"});
+async function rest(path,opt={}){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...opt,headers:{...apiHeaders(),...(opt.headers||{})}}),b=await r.json().catch(()=>null);if(!r.ok)throw new Error(b?.message||b?.hint||b?.error_description||"Databaseverzoek mislukt.");return b}
+async function authRequest(email,password){const r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password})}),b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.msg||b.error_description||b.message||"Inloggen mislukt.");return b}
+function showLogin(m=""){$("loginView").hidden=false;$("portalView").hidden=true;$("loginMessage").textContent=m;$("loginMessage").classList.remove("error")}
+function showPortal(){$("loginView").hidden=true;$("portalView").hidden=false}
+function err(target,m){target.textContent=m;target.classList.add("error")}
+function office(){return["leidinggevende","planner","beheerder"].includes(wbRole)}
+function admin(){return["planner","beheerder"].includes(wbRole)}
 
 async function loadProfile(){
-  const {data:{user},error:authError}=await supabase.auth.getUser();
-  if(authError||!user){showLogin();return false}
-  const {data:userRow,error:userError}=await supabase.from("gebruiker").select("id,naam,email,actief,rol,organisatie_id,organisatie:organisatie_id(id,naam,actieve_modules)").eq("id",user.id).maybeSingle();
-  if(userError) throw userError;
-  if(!userRow){await supabase.auth.signOut();showLogin("Je account is nog niet gekoppeld aan een Normly-gebruiker.");return false}
-  if(!userRow.actief){await supabase.auth.signOut();showLogin("Je Normly-account is gedeactiveerd.");return false}
-  const org=userRow.organisatie;
-  if(!org||!(org.actieve_modules||[]).includes("werkbonnen")){await supabase.auth.signOut();showLogin("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");return false}
-  const {data:wbRole,error:roleError}=await supabase.from("werkbon_gebruiker").select("rol").eq("gebruiker_id",user.id).maybeSingle();
-  if(roleError) throw roleError;
-  if(!wbRole){await supabase.auth.signOut();showLogin("Je account heeft nog geen Werkbonnen-rol.");return false}
-  profile={...userRow,werkbonRol:wbRole.rol};
-  $("userBadge").textContent=userRow.naam||userRow.email||user.email;
-  $("welcomeTitle").textContent="Overzicht";
-  $("orgLabel").textContent=org.naam;
-  $("roleLabel").textContent=wbRole.rol;
-  showPortal();
-  await loadWorkorders();
-  return true;
+ if(!accessToken||!sessionUser?.id)return false;
+ const u=(await rest("gebruiker?select=id,naam,email,actief,rol,organisatie_id,organisatie:organisatie_id(id,naam,actieve_modules)&id=eq."+encodeURIComponent(sessionUser.id)))?.[0];
+ if(!u||!u.actief)throw new Error("Je Normly-account is niet actief of niet gekoppeld.");
+ if(!u.organisatie||(u.organisatie.actieve_modules||[]).indexOf("werkbonnen")<0)throw new Error("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");
+ const rr=await rest("werkbon_gebruiker?select=rol&gebruiker_id=eq."+encodeURIComponent(u.id));wbRole=rr?.[0]?.rol;if(!wbRole)throw new Error("Je account heeft nog geen Werkbonnen-rol.");
+ profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();await refs();await list();return true
 }
-
-async function loadWorkorders(){
-  accessMessage.textContent="";
-  accessMessage.classList.remove("error");
-  const {data,error}=await supabase.from("werkbon").select("id,nummer,titel,omschrijving,prioriteit,status,gepland_op,gepland_van,gepland_tot,klant:klant_id(naam)").order("gepland_op",{ascending:true}).order("nummer",{ascending:false});
-  if(error){accessMessage.textContent="Werkbonnen konden niet worden geladen: "+error.message;accessMessage.classList.add("error");return}
-  const rows=data||[];
-  const today=new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Amsterdam"});
-  $("openCount").textContent=rows.filter(r=>!["afgerond","gefactureerd"].includes(r.status)).length;
-  $("todayCount").textContent=rows.filter(r=>r.gepland_op===today).length;
-  $("doneCount").textContent=rows.filter(r=>["afgerond","gefactureerd"].includes(r.status)).length;
-  const container=$("workorders");
-  if(!rows.length){container.innerHTML='<div class="empty">Er zijn nog geen werkbonnen beschikbaar.</div>';return}
-  container.innerHTML=rows.map(r=>{
-    const date=r.gepland_op?new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium"}).format(new Date(r.gepland_op+"T00:00:00")):"Nog niet gepland";
-    const klant=r.klant?.naam?" · "+escapeHtml(r.klant.naam):"";
-    return '<article class="workorder"><div><h3>'+escapeHtml(r.nummer)+" — "+escapeHtml(r.titel)+'</h3><p>'+date+klant+'</p></div><span class="status">'+escapeHtml(r.status.replaceAll("_"," "))+"</span></article>";
-  }).join("");
+async function refs(){
+ [customers,employees]=await Promise.all([
+  rest("werkbon_klant?select=id,naam,klantnummer,adres,postcode,plaats,email,telefoon,actief&actief=eq.true&order=naam.asc"),
+  rest("gebruiker?select=id,naam,email,actief,organisatie_id&organisatie_id=eq."+encodeURIComponent(profile.organisatie_id)+"&actief=eq.true&order=naam.asc")
+ ]);
+ [contacts,objects]=await Promise.all([
+  rest("werkbon_contactpersoon?select=id,klant_id,naam,functie,email,telefoon&order=naam.asc"),
+  rest("werkbon_object?select=id,klant_id,type,naam,identificatie,merk,model,bouwjaar,locatie_omschrijving,notitie,actief&actief=eq.true&order=naam.asc")
+ ]);
+ renderSelects()
 }
-
-function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-
-window.NormlyLogin=async function(e){
-  e.preventDefault();
-  loginMessage.classList.remove("error");
-  loginMessage.textContent="Bezig met inloggen...";
-  if(!supabase){
-    setLoginError("De loginmodule is niet goed geladen. Ik heb dit geblokkeerd zodat je gegevens niet in de URL terechtkomen.");
-    return false;
-  }
-  const email=$("email").value.trim(),password=$("password").value;
-  try{
-    const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error){setLoginError("Inloggen mislukt. Controleer je e-mailadres en wachtwoord.");return false}
-    await loadProfile();
-  }catch(err){
-    console.error(err);
-    await supabase.auth.signOut();
-    setLoginError("Er ging iets mis bij het laden van je Werkbonnen-profiel: "+(err?.message||"onbekende fout"));
-  }
-  return false;
-};
-
-async function init(){
-  if(!window.supabase?.createClient){
-    setLoginError("De Supabase-loginmodule kon niet worden geladen. Controleer je internetverbinding en probeer opnieuw.");
-    return;
-  }
-  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  $("logoutButton").addEventListener("click",async()=>{await supabase.auth.signOut();profile=null;showLogin("Je bent uitgelogd.")});
-  $("refreshButton").addEventListener("click",loadWorkorders);
-  $("resetButton").addEventListener("click",async()=>{
-    const email=$("email").value.trim();
-    if(!email){loginMessage.textContent="Vul eerst je e-mailadres in.";return}
-    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
-    loginMessage.textContent=error?"Wachtwoord resetten is niet gelukt.":"Als dit account bestaat, ontvang je een e-mail om je wachtwoord te wijzigen.";
-  });
-  supabase.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")showLogin()});
-  try{await loadProfile()}catch(err){console.error(err);setLoginError("Het portaal kon niet worden geladen: "+(err?.message||"onbekende fout"))}
+function renderSelects(){
+ $("newCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+(c.klantnummer?" · "+esc(c.klantnummer):"")+"</option>").join("");
+ $("customerManageList").innerHTML=customers.length?customers.map(c=>'<div class="manage-row"><div><strong>'+esc(c.naam)+'</strong><small>'+esc([c.adres,c.postcode,c.plaats].filter(Boolean).join(", "))+"</small></div></div>").join(""):'<div class="empty">Nog geen klanten.</div>';
+ dependentSelects()
 }
+function dependentSelects(){
+ const cid=$("newCustomer").value;
+ $("newObject").innerHTML='<option value="">Geen object</option>'+objects.filter(o=>!cid||o.klant_id===cid).map(o=>'<option value="'+esc(o.id)+'">'+esc(o.naam)+(o.locatie_omschrijving?" · "+esc(o.locatie_omschrijving):"")+"</option>").join("");
+ $("newContact").innerHTML='<option value="">Geen contactpersoon</option>'+contacts.filter(c=>!cid||c.klant_id===cid).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+(c.functie?" · "+esc(c.functie):"")+"</option>").join("")
+}
+async function list(){
+ const rows=await rest("werkbon?select=id,nummer,titel,prioriteit,status,gepland_op,gepland_van,gepland_tot,klant:klant_id(naam),object:object_id(naam,locatie_omschrijving)&order=gepland_op.asc.nullslast&order=nummer.desc")||[];
+ const today=new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Amsterdam"});
+ $("openCount").textContent=rows.filter(r=>!["afgerond","gefactureerd"].includes(r.status)).length;
+ $("todayCount").textContent=rows.filter(r=>r.gepland_op===today).length;
+ $("doneCount").textContent=rows.filter(r=>["afgerond","gefactureerd"].includes(r.status)).length;
+ $("plannedCount").textContent=rows.filter(r=>["ingepland","onderweg","in_uitvoering"].includes(r.status)).length;
+ $("workorders").innerHTML=rows.length?rows.map(r=>{const d=r.gepland_op?new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium"}).format(new Date(r.gepland_op+"T00:00:00")):"Nog niet gepland",t=r.gepland_van?" · "+r.gepland_van.slice(0,5)+(r.gepland_tot?"–"+r.gepland_tot.slice(0,5):""):"";return '<button class="workorder" type="button" data-id="'+esc(r.id)+'"><div><div class="workorder-top"><strong>'+esc(r.nummer)+'</strong><span class="priority priority-'+esc(r.prioriteit)+'">'+esc(r.prioriteit)+'</span></div><h3>'+esc(r.titel)+'</h3><p>'+esc(r.klant?.naam||"Geen klant")+" · "+esc(d+t)+(r.object?.locatie_omschrijving?" · "+esc(r.object.locatie_omschrijving):"")+'</p></div><span class="status status-'+esc(r.status)+'">'+esc(STATUS_LABELS[r.status]||r.status)+"</span></button>"}).join(""):'<div class="empty"><strong>Nog geen werkbonnen</strong><span>Maak de eerste werkbon aan.</span></div>';
+ document.querySelectorAll(".workorder").forEach(x=>x.onclick=()=>openWorkorder(x.dataset.id))
+}
+async function createWorkorder(e){
+ e.preventDefault();$("saveNewWorkorder").disabled=true;
+ try{const p={organisatie_id:profile.organisatie_id,klant_id:$("newCustomer").value||null,contactpersoon_id:$("newContact").value||null,object_id:$("newObject").value||null,titel:$("newTitle").value.trim(),omschrijving:$("newDescription").value.trim()||null,soort_werk:$("newType").value.trim()||null,prioriteit:$("newPriority").value,status:$("newDate").value?"ingepland":"concept",gepland_op:$("newDate").value||null,gepland_van:$("newFrom").value||null,gepland_tot:$("newTo").value||null,aangemaakt_door:profile.id,opmerking_intern:$("newInternal").value.trim()||null,factuurstatus:$("newInvoice").value};if(!p.titel)throw new Error("Vul een titel in.");const made=await rest("werkbon",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify(p)});closeModal("newModal");await list();if(made?.[0]?.id)await openWorkorder(made[0].id)}catch(e){err($("newMessage"),e.message||"Werkbon aanmaken mislukt.")}finally{$("saveNewWorkorder").disabled=false}
+}
+async function openWorkorder(id){
+ try{currentWorkorder=(await rest("werkbon?select=*,klant:klant_id(id,naam,adres,postcode,plaats,email,telefoon),contact:contactpersoon_id(id,naam,functie,email,telefoon),object:object_id(id,naam,type,identificatie,merk,model,locatie_omschrijving)&id=eq."+encodeURIComponent(id)))?.[0];if(!currentWorkorder)throw new Error("Werkbon niet gevonden.");
+ const q=encodeURIComponent(id),[a,h,m,p,l]=await Promise.all([
+  rest("werkbon_toewijzing?select=werkbon_id,gebruiker_id,hoofduitvoerder,gebruiker:gebruiker_id(id,naam,email)&werkbon_id=eq."+q),
+  rest("werkbon_uur?select=id,gebruiker_id,datum,soort,minuten,omschrijving,gebruiker:gebruiker_id(naam)&werkbon_id=eq."+q+"&order=datum.desc,created_at.desc"),
+  rest("werkbon_materiaal?select=id,omschrijving,artikelnummer,aantal,eenheid&werkbon_id=eq."+q+"&order=created_at.desc"),
+  rest("werkbon_foto?select=id,storage_pad,fase,omschrijving,created_at&werkbon_id=eq."+q+"&order=created_at.desc"),
+  rest("werkbon_statuslog?select=id,van_status,naar_status,toelichting,created_at,gebruiker:gebruiker_id(naam)&werkbon_id=eq."+q+"&order=created_at.desc")
+ ]);renderDetail(a||[],h||[],m||[],p||[],l||[]);openModal("detailModal")}catch(e){err($("accessMessage"),e.message||"Werkbon kon niet worden geopend.")}
+}
+function renderDetail(a,h,m,p,l){
+ const w=currentWorkorder;$("detailTitle").textContent=(w.nummer||"")+" · "+(w.titel||"");$("detailStatus").textContent=STATUS_LABELS[w.status]||w.status;$("detailStatus").className="status status-"+w.status;$("detailCustomer").textContent=w.klant?.naam||"Geen klant";$("detailLocation").textContent=w.object?(w.object.naam+(w.object.locatie_omschrijving?" · "+w.object.locatie_omschrijving:"")):"Geen object/locatie";$("detailDescription").textContent=w.omschrijving||"Geen omschrijving.";
+ $("executionText").value=w.uitvoering_omschrijving||"";$("customerNote").value=w.opmerking_klant||"";$("internalNote").value=w.opmerking_intern||"";$("invoiceReference").value=w.factuur_referentie||"";$("invoiceStatus").value=w.factuurstatus||"niet_factureren";$("detailSaveBasic").hidden=!office();$("invoiceBox").hidden=!admin();
+ $("detailStatusSelect").innerHTML=STATUS_ORDER.map(s=>'<option value="'+s+'"'+(s===w.status?" selected":"")+'>'+STATUS_LABELS[s]+"</option>").join("");$("detailStatusSelect").disabled=!office()&&wbRole!=="monteur";if(wbRole==="monteur")["concept","ingepland","gefactureerd"].forEach(s=>{const o=$('option[value="'+s+'"]',$("detailStatusSelect"));if(o)o.disabled=true});
+ $("assignmentList").innerHTML=employees.map(e=>{const x=a.find(v=>v.gebruiker_id===e.id);return '<label class="check-row"><input type="checkbox" data-employee="'+esc(e.id)+'"'+(x?" checked":"")+(office()?"":" disabled")+"><span>"+esc(e.naam||e.email)+"</span></label>"}).join("")||'<div class="empty">Geen actieve medewerkers.</div>';
+ $("hoursList").innerHTML=h.length?h.map(x=>'<div class="data-row"><div><strong>'+esc(x.gebruiker?.naam||"Medewerker")+'</strong><small>'+esc(x.datum)+" · "+esc(x.soort)+'</small></div><span>'+formatMin(x.minuten)+'</span><button class="icon-button delete-hour" data-id="'+esc(x.id)+'" type="button">×</button></div>').join(""):'<div class="empty">Nog geen uren.</div>';
+ $("materialList").innerHTML=m.length?m.map(x=>'<div class="data-row"><div><strong>'+esc(x.omschrijving)+'</strong><small>'+esc(x.artikelnummer||"Geen artikelnummer")+'</small></div><span>'+esc(x.aantal+" "+x.eenheid)+'</span><button class="icon-button delete-material" data-id="'+esc(x.id)+'" type="button">×</button></div>').join(""):'<div class="empty">Nog geen materialen.</div>';
+ $("photoList").innerHTML=p.length?p.map(x=>'<div class="photo-row"><span>'+esc(x.fase)+'</span><div><strong>'+esc(x.omschrijving||"Foto")+'</strong><small>'+esc(new Date(x.created_at).toLocaleString("nl-NL"))+'</small></div></div>').join(""):'<div class="empty">Nog geen foto’s.</div>';
+ $("statusLog").innerHTML=l.length?l.map(x=>'<div class="timeline-row"><span class="timeline-dot"></span><div><strong>'+esc(STATUS_LABELS[x.naar_status]||x.naar_status)+'</strong><small>'+esc(new Date(x.created_at).toLocaleString("nl-NL"))+" · "+esc(x.gebruiker?.naam||"Systeem")+"</small>"+(x.toelichting?"<p>"+esc(x.toelichting)+"</p>":"")+"</div></div>").join(""):'<div class="empty">Nog geen statuslog.</div>';
+ document.querySelectorAll(".delete-hour").forEach(b=>b.onclick=()=>deleteRow("werkbon_uur",b.dataset.id));document.querySelectorAll(".delete-material").forEach(b=>b.onclick=()=>deleteRow("werkbon_materiaal",b.dataset.id));setupSignature()
+}
+function formatMin(n){return Math.floor(n/60)+"u "+String(n%60).padStart(2,"0")+"m"}
+async function saveDetail(){
+ try{const p={status:$("detailStatusSelect").value,uitvoering_omschrijving:$("executionText").value.trim()||null,opmerking_klant:$("customerNote").value.trim()||null,opmerking_intern:$("internalNote").value.trim()||null};if(admin()){p.factuurstatus=$("invoiceStatus").value;p.factuur_referentie=$("invoiceReference").value.trim()||null}await rest("werkbon?id=eq."+encodeURIComponent(currentWorkorder.id),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify(p)});if(office())await saveAssignments();await list();await openWorkorder(currentWorkorder.id);$("detailMessage").textContent="Opgeslagen."}catch(e){err($("detailMessage"),e.message||"Opslaan mislukt.")}
+}
+async function saveAssignments(){const ids=[...document.querySelectorAll("[data-employee]:checked")].map(x=>x.dataset.employee);await rest("werkbon_toewijzing?werkbon_id=eq."+encodeURIComponent(currentWorkorder.id),{method:"DELETE"});if(ids.length)await rest("werkbon_toewijzing",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify(ids.map((id,i)=>({werkbon_id:currentWorkorder.id,gebruiker_id:id,hoofduitvoerder:i===0})))})}
+async function addHours(e){e.preventDefault();try{const mins=Number($("hourHours").value||0)*60+Number($("hourMinutes").value||0);if(mins<=0||mins>1440)throw new Error("Voer een geldig aantal uren/minuten in.");await rest("werkbon_uur",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({werkbon_id:currentWorkorder.id,gebruiker_id:profile.id,datum:$("hourDate").value,soort:$("hourType").value,minuten:Math.round(mins),omschrijving:$("hourDescription").value.trim()||null})});e.target.reset();$("hourDate").value=new Date().toISOString().slice(0,10);await openWorkorder(currentWorkorder.id)}catch(e){err($("detailMessage"),e.message||"Uren opslaan mislukt.")}}
+async function addMaterial(e){e.preventDefault();try{const n=Number($("materialAmount").value);if(!(n>0))throw new Error("Vul een geldig aantal in.");await rest("werkbon_materiaal",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({werkbon_id:currentWorkorder.id,omschrijving:$("materialDescription").value.trim(),artikelnummer:$("materialNumber").value.trim()||null,aantal:n,eenheid:$("materialUnit").value.trim()||"stuks"})});e.target.reset();$("materialAmount").value="1";$("materialUnit").value="stuks";await openWorkorder(currentWorkorder.id)}catch(e){err($("detailMessage"),e.message||"Materiaal opslaan mislukt.")}}
+async function deleteRow(table,id){if(!confirm("Deze regel verwijderen?"))return;try{await rest(table+"?id=eq."+encodeURIComponent(id),{method:"DELETE"});await openWorkorder(currentWorkorder.id)}catch(e){err($("detailMessage"),e.message||"Verwijderen mislukt.")}}
+async function uploadPhoto(e){const f=e.target.files?.[0];if(!f)return;try{if(!f.type.startsWith("image/"))throw new Error("Kies een afbeelding.");if(f.size>8*1024*1024)throw new Error("De foto mag maximaal 8 MB zijn.");const path=profile.organisatie_id+"/"+currentWorkorder.id+"/"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9._-]/g,"-");const r=await fetch(SUPABASE_URL+"/storage/v1/object/"+PHOTO_BUCKET+"/"+path,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+accessToken,"Content-Type":f.type,"x-upsert":"false"},body:f}),b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.message||"Foto uploaden mislukt.");await rest("werkbon_foto",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({werkbon_id:currentWorkorder.id,storage_pad:path,fase:$("photoPhase").value,omschrijving:$("photoDescription").value.trim()||null,gebruiker_id:profile.id})});e.target.value="";$("photoDescription").value="";await openWorkorder(currentWorkorder.id)}catch(e){err($("detailMessage"),e.message||"Foto uploaden mislukt.")}}
+function setupSignature(){signatureCanvas=$("signatureCanvas");if(!signatureCanvas)return;const c=signatureCanvas.getContext("2d");c.clearRect(0,0,signatureCanvas.width,signatureCanvas.height);c.lineWidth=3;c.lineCap="round";c.strokeStyle="#173b61";signatureDrawing=false;const point=e=>{const r=signatureCanvas.getBoundingClientRect(),s=e.touches?.[0]||e;return{x:(s.clientX-r.left)*signatureCanvas.width/r.width,y:(s.clientY-r.top)*signatureCanvas.height/r.height}};signatureCanvas.onpointerdown=e=>{e.preventDefault();signatureDrawing=true;const p=point(e);c.beginPath();c.moveTo(p.x,p.y)};signatureCanvas.onpointermove=e=>{if(!signatureDrawing)return;e.preventDefault();const p=point(e);c.lineTo(p.x,p.y);c.stroke()};signatureCanvas.onpointerup=()=>signatureDrawing=false;signatureCanvas.onpointerleave=()=>signatureDrawing=false}
+async function saveSignature(){try{const name=$("signatureName").value.trim();if(!name)throw new Error("Vul de naam van de klant in.");const blob=await new Promise(r=>signatureCanvas.toBlob(r,"image/png"));if(!blob)throw new Error("Handtekening kon niet worden verwerkt.");const path=profile.organisatie_id+"/"+currentWorkorder.id+"/signature-"+Date.now()+".png",r=await fetch(SUPABASE_URL+"/storage/v1/object/"+PHOTO_BUCKET+"/"+path,{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+accessToken,"Content-Type":"image/png"},body:blob}),b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.message||"Handtekening uploaden mislukt.");await rest("werkbon?id=eq."+encodeURIComponent(currentWorkorder.id),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({handtekening_pad:path,handtekening_naam:name,handtekening_op:new Date().toISOString(),status:"afgerond"})});await list();await openWorkorder(currentWorkorder.id)}catch(e){err($("detailMessage"),e.message||"Handtekening opslaan mislukt.")}}
+async function createCustomer(e){e.preventDefault();try{await rest("werkbon_klant",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({organisatie_id:profile.organisatie_id,naam:$("customerName").value.trim(),klantnummer:$("customerNumber").value.trim()||null,adres:$("customerAddress").value.trim()||null,postcode:$("customerPostcode").value.trim()||null,plaats:$("customerCity").value.trim()||null,email:$("customerEmail").value.trim()||null,telefoon:$("customerPhone").value.trim()||null,actief:true})});e.target.reset();await refs();$("manageMessage").textContent="Klant toegevoegd."}catch(e){err($("manageMessage"),e.message||"Klant toevoegen mislukt.")}}
+async function createObject(e){e.preventDefault();try{await rest("werkbon_object",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({organisatie_id:profile.organisatie_id,klant_id:$("objectCustomer").value||null,type:$("objectType").value.trim(),naam:$("objectName").value.trim(),identificatie:$("objectIdentifier").value.trim()||null,locatie_omschrijving:$("objectLocation").value.trim()||null,actief:true})});e.target.reset();await refs();$("manageMessage").textContent="Object toegevoegd."}catch(e){err($("manageMessage"),e.message||"Object toevoegen mislukt.")}}
+async function employeeRoles(){const rs=await rest("werkbon_gebruiker?select=gebruiker_id,rol&order=created_at.asc"),map=new Map((rs||[]).map(x=>[x.gebruiker_id,x.rol]));$("employeeRoles").innerHTML=employees.map(e=>'<div class="manage-row"><div><strong>'+esc(e.naam||e.email)+'</strong><small>'+esc(e.email||"")+'</small></div><select data-role-user="'+esc(e.id)+'"><option value="">Geen rol</option>'+Object.entries(ROLE_LABELS).map(([v,l])=>'<option value="'+v+'"'+(map.get(e.id)===v?" selected":"")+'>'+l+"</option>").join("")+'</select><button class="secondary save-role" data-role-id="'+esc(e.id)+'" type="button">Opslaan</button></div>').join("")||'<div class="empty">Geen actieve medewerkers.</div>';document.querySelectorAll(".save-role").forEach(b=>b.onclick=()=>saveRole(b.dataset.roleId))}
+async function saveRole(id){try{const role=$('select[data-role-user="'+id+'"]').value;await rest("werkbon_gebruiker?gebruiker_id=eq."+encodeURIComponent(id),{method:"DELETE"});if(role)await rest("werkbon_gebruiker",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({gebruiker_id:id,rol:role})});$("manageMessage").textContent="Rol opgeslagen.";await refs();await employeeRoles()}catch(e){err($("manageMessage"),e.message||"Rol opslaan mislukt.")}}
+function openModal(id){$(id).hidden=false;document.body.classList.add("modal-open")}
+function closeModal(id){$(id).hidden=true;if(!document.querySelector(".modal:not([hidden])"))document.body.classList.remove("modal-open")}
 
-init();
+document.addEventListener("DOMContentLoaded",()=>{
+ $("loginButton").onclick=async()=>{try{$("loginMessage").textContent="Bezig met inloggen...";const s=await authRequest($("email").value.trim(),$("password").value);accessToken=s.access_token;sessionUser=s.user;sessionStorage.setItem("normly_workbon_access",accessToken);sessionStorage.setItem("normly_workbon_user",JSON.stringify(sessionUser));await loadProfile()}catch(e){accessToken="";sessionStorage.clear();err($("loginMessage"),e.message||"Inloggen mislukt.")}};
+ $("password").onkeydown=e=>{if(e.key==="Enter")$("loginButton").click()};$("logoutButton").onclick=()=>{accessToken="";sessionUser=null;sessionStorage.clear();showLogin("Je bent uitgelogd.")};
+ $("refreshButton").onclick=async()=>{try{await refs();await list()}catch(e){err($("accessMessage"),e.message||"Verversen mislukt.")}};
+ $("newWorkorderButton").onclick=()=>{ $("newForm").reset();$("newMessage").textContent="";renderSelects();openModal("newModal")};
+ $("newCustomer").onchange=dependentSelects;$("newForm").onsubmit=createWorkorder;$("detailSaveBasic").onclick=saveDetail;$("hourForm").onsubmit=addHours;$("materialForm").onsubmit=addMaterial;$("photoFile").onchange=uploadPhoto;$("saveSignature").onclick=saveSignature;$("clearSignature").onclick=setupSignature;
+ $("customerForm").onsubmit=createCustomer;$("objectForm").onsubmit=createObject;
+ $("manageButton").onclick=async()=>{openModal("manageModal");$("manageMessage").textContent="";$("objectCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+"</option>").join("");await employeeRoles()};
+ document.querySelectorAll("[data-close-modal]").forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});
+ $("hourDate").value=new Date().toISOString().slice(0,10);$("materialAmount").value="1";$("materialUnit").value="stuks";
+ if(accessToken)loadProfile().catch(()=>{accessToken="";sessionStorage.clear();showLogin()});
+});
