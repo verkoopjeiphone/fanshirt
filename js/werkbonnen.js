@@ -71,7 +71,7 @@ async function loadProfile(){
  if(!u||!u.actief)throw new Error("Je Normly-account is niet actief of niet gekoppeld.");
  if(!u.organisatie||(u.organisatie.actieve_modules||[]).indexOf("werkbonnen")<0)throw new Error("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");
  const rr=await rest("werkbon_gebruiker?select=rol&gebruiker_id=eq."+encodeURIComponent(u.id));wbRole=rr?.[0]?.rol;if(!wbRole)throw new Error("Je account heeft nog geen Werkbonnen-rol.");
- profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();await refs();renderDemoInputs();await list();return true
+ profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();try{await refs();renderDemoInputs();await list()}catch(e){err($("accessMessage"),"Inloggen gelukt, maar gegevens laden mislukt: "+(e.message||"onbekende fout"));console.error("Werkbonnen initialisatie:",e)}return true
 }
 async function refs(){
  [customers,employees]=await Promise.all([
