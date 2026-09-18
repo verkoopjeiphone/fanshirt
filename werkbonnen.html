@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Werkbonnen | Normly</title>
+  <meta name="description" content="Normly Werkbonnen-portaal">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/werkbonnen.css">
+</head>
+<body>
+  <main class="portal-shell">
+    <section id="loginView" class="auth-card">
+      <a class="brand" href="/">Normly</a>
+      <span class="eyebrow">Werkbonnen</span>
+      <h1>Inloggen op het Werkbonnen-portaal</h1>
+      <p class="muted">Gebruik je Normly-account om je werkbonnen te bekijken en uit te voeren.</p>
+      <form id="loginForm">
+        <label for="email">E-mailadres</label>
+        <input id="email" name="email" type="email" autocomplete="username" required>
+        <label for="password">Wachtwoord</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button class="primary" type="submit">Inloggen</button>
+      </form>
+      <button id="resetButton" class="text-button" type="button">Wachtwoord vergeten?</button>
+      <p id="loginMessage" class="message" role="alert"></p>
+    </section>
+
+    <section id="portalView" class="portal" hidden>
+      <header class="topbar">
+        <div><a class="brand" href="/">Normly</a><span class="portal-name">Werkbonnen</span></div>
+        <div class="topbar-actions"><span id="userBadge" class="user-badge"></span><button id="logoutButton" class="secondary">Uitloggen</button></div>
+      </header>
+      <div class="portal-content">
+        <div class="page-heading">
+          <div><span class="eyebrow">Werkbonnen</span><h1 id="welcomeTitle">Overzicht</h1><p id="orgLabel" class="muted"></p></div>
+          <button id="refreshButton" class="secondary">Verversen</button>
+        </div>
+        <div id="accessMessage" class="message"></div>
+        <div class="stats">
+          <article><span>Open</span><strong id="openCount">0</strong></article>
+          <article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article>
+          <article><span>Afgerond</span><strong id="doneCount">0</strong></article>
+        </div>
+        <section class="panel">
+          <div class="panel-heading"><h2>Werkbonnen</h2><span id="roleLabel" class="role"></span></div>
+          <div id="workorders" class="workorders"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+  <script src="js/werkbonnen.js"></script>
+</body>
+</html>
