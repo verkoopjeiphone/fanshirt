@@ -15,7 +15,7 @@
       <span class="eyebrow">Werkbonnen</span>
       <h1>Inloggen op het Werkbonnen-portaal</h1>
       <p class="muted">Gebruik je Normly-account om je werkbonnen te bekijken en uit te voeren.</p>
-      <form id="loginForm">
+      <form id="loginForm" onsubmit="return window.NormlyLogin ? window.NormlyLogin(event) : false">
         <label for="email">E-mailadres</label>
         <input id="email" name="email" type="email" autocomplete="username" required>
         <label for="password">Wachtwoord</label>
@@ -49,7 +49,8 @@
       </div>
     </section>
   </main>
+  <script>window.addEventListener("error",function(e){const m=document.getElementById("loginMessage");if(m)m.textContent="Technische fout bij laden: "+e.message});window.addEventListener("unhandledrejection",function(e){const m=document.getElementById("loginMessage");if(m)m.textContent="Technische fout: "+(e.reason&&e.reason.message?e.reason.message:"onbekende fout")});</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/werkbonnen.js"></script>
+  <script src="js/werkbonnen.js?v=20260918-3"></script>
 </body>
 </html>
