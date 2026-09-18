@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Werkbonnen | Normly</title>
-  <meta name="build" content="2026-09-18-login-4">
+  <meta name="build" content="2026-09-18-login-5">
   <meta name="description" content="Normly Werkbonnen-portaal">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/werkbonnen.css">
@@ -186,7 +186,7 @@
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", """: "&quot;", "'": "&#039;"
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
       }[c]));
     }
 
