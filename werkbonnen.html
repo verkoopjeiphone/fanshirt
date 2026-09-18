@@ -84,7 +84,6 @@
 </div></div></div>
 
 <script src="js/werkbonnen.js?v=20260918-login-debug-1"></script>
-<script src="js/werkbonnen-login-fix-20260918.js?v=1"></script>
 <script>
 (function(){
   const U="https://oycmdwxmlhchftlunbem.supabase.co", K="sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
@@ -101,9 +100,17 @@
       if(!r.ok||!s.access_token)throw new Error(s.error_description||s.msg||"Inloggen mislukt.");
       sessionStorage.setItem("normly_workbon_access",s.access_token);
       sessionStorage.setItem("normly_workbon_user",JSON.stringify(s.user||{}));
-      // Force a clean page load so the portal initializes with the new token.
-      window.location.href=window.location.pathname+"?v=login-"+Date.now();
-    }catch(e){msg(e.message||"Inloggen mislukt.",true);b.disabled=false;b.textContent="Inloggen"}
+      accessToken=s.access_token; sessionUser=s.user||{};
+      try{
+        await loadProfile();
+        if(!$("portalView").hidden) msg("",false);
+      }catch(e){
+        showLogin();
+        msg("Inloggen gelukt, maar het profiel kon niet worden geladen: "+(e.message||"onbekende fout"),true);
+        console.error("Werkbonnen login/profile:",e);
+      }
+    }catch(e){msg(e.message||"Inloggen mislukt.",true)}
+    finally{b.disabled=false;b.textContent="Inloggen"}
   },true);
   window.addEventListener("error",function(e){if(e&&e.error)msg("Technische fout: "+(e.error.message||"onbekende fout"),true)});
 })();
