@@ -85,4 +85,27 @@
 
 <script src="js/werkbonnen.js?v=20260918-demo-2"></script>
 <script src="js/werkbonnen-login-fix-20260918.js?v=1"></script>
+<script>
+(function(){
+  const U="https://oycmdwxmlhchftlunbem.supabase.co", K="sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
+  function msg(t,e){var n=document.getElementById("loginMessage");if(n){n.textContent=t;n.classList.toggle("error",!!e)}}
+  document.addEventListener("click",async function(ev){
+    var b=ev.target.closest&&ev.target.closest("#loginButton"); if(!b)return;
+    ev.preventDefault();ev.stopImmediatePropagation();
+    var email=(document.getElementById("email").value||"").trim(), password=document.getElementById("password").value||"";
+    if(!email||!password){msg("Vul je e-mailadres en wachtwoord in.",true);return}
+    b.disabled=true;b.textContent="Inloggen…";msg("Bezig met inloggen…",false);
+    try{
+      var r=await fetch(U+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:K,"Content-Type":"application/json"},body:JSON.stringify({email:email,password:password})});
+      var s=await r.json().catch(function(){return{}});
+      if(!r.ok||!s.access_token)throw new Error(s.error_description||s.msg||"Inloggen mislukt.");
+      sessionStorage.setItem("normly_workbon_access",s.access_token);
+      sessionStorage.setItem("normly_workbon_user",JSON.stringify(s.user||{}));
+      // Force a clean page load so the portal initializes with the new token.
+      window.location.href=window.location.pathname+"?v=login-"+Date.now();
+    }catch(e){msg(e.message||"Inloggen mislukt.",true);b.disabled=false;b.textContent="Inloggen"}
+  },true);
+  window.addEventListener("error",function(e){if(e&&e.error)msg("Technische fout: "+(e.error.message||"onbekende fout"),true)});
+})();
+</script>
 </body></html>
