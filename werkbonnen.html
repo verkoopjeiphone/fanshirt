@@ -2,12 +2,281 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=werkbonnen-portaal.html">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Werkbonnen | Normly</title>
+  <meta name="build" content="2026-09-18-login-4">
+  <meta name="description" content="Normly Werkbonnen-portaal">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/werkbonnen.css">
 </head>
 <body>
-  <p>Werkbonnen-portaal openen…</p>
-  <script>window.location.replace("werkbonnen-portaal.html");</script>
+  <main class="portal-shell">
+    <section id="loginView" class="auth-card">
+      <a class="brand" href="/">Normly</a>
+      <span class="eyebrow">Werkbonnen</span>
+      <h1>Inloggen op het Werkbonnen-portaal</h1>
+      <p class="muted">Gebruik je Normly-account om je werkbonnen te bekijken en uit te voeren.</p>
+
+      <div>
+        <label for="email">E-mailadres</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Wachtwoord</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button id="loginButton" class="primary" type="button">Inloggen</button>
+      </div>
+
+      <button id="resetButton" class="text-button" type="button">Wachtwoord vergeten?</button>
+      <p id="loginMessage" class="message" role="alert"></p>
+    </section>
+
+    <section id="portalView" class="portal" hidden>
+      <header class="topbar">
+        <div><a class="brand" href="/">Normly</a><span class="portal-name">Werkbonnen</span></div>
+        <div class="topbar-actions"><span id="userBadge" class="user-badge"></span><button id="logoutButton" class="secondary" type="button">Uitloggen</button></div>
+      </header>
+      <div class="portal-content">
+        <div class="page-heading">
+          <div><span class="eyebrow">Werkbonnen</span><h1>Overzicht</h1><p id="orgLabel" class="muted"></p></div>
+          <button id="refreshButton" class="secondary" type="button">Verversen</button>
+        </div>
+        <div id="accessMessage" class="message"></div>
+        <div class="stats">
+          <article><span>Open</span><strong id="openCount">0</strong></article>
+          <article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article>
+          <article><span>Afgerond</span><strong id="doneCount">0</strong></article>
+        </div>
+        <section class="panel">
+          <div class="panel-heading"><h2>Werkbonnen</h2><span id="roleLabel" class="role"></span></div>
+          <div id="workorders" class="workorders"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://oycmdwxmlhchftlunbem.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
+    let accessToken = sessionStorage.getItem("normly_workbon_access") || "";
+
+    const $ = id => document.getElementById(id);
+    const loginView = $("loginView");
+    const portalView = $("portalView");
+    const loginMessage = $("loginMessage");
+    const accessMessage = $("accessMessage");
+
+    function showLogin(message = "") {
+      loginView.hidden = false;
+      portalView.hidden = true;
+      loginMessage.textContent = message;
+    }
+
+    function showPortal() {
+      loginView.hidden = true;
+      portalView.hidden = false;
+    }
+
+    function messageError(message) {
+      loginMessage.textContent = message;
+      loginMessage.classList.add("error");
+    }
+
+    function apiHeaders(token = accessToken) {
+      return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      };
+    }
+
+    async function authRequest(email, password) {
+      const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.msg || body.error_description || body.message || "Inloggen mislukt.");
+      return body;
+    }
+
+    async function rest(path) {
+      const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, { headers: apiHeaders() });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.message || body?.hint || "Databaseverzoek mislukt.");
+      return body;
+    }
+
+    async function loadProfile() {
+      if (!accessToken) return false;
+
+      const storedUser = JSON.parse(sessionStorage.getItem("normly_workbon_user") || "null");
+      if (!storedUser?.id) {
+        showLogin();
+        return false;
+      }
+
+      const userRows = await rest(
+        "gebruiker?select=id,naam,email,actief,rol,organisatie_id,organisatie:organisatie_id(id,naam,actieve_modules)&id=eq." +
+        encodeURIComponent(storedUser.id)
+      );
+      const userRow = userRows?.[0];
+
+      if (!userRow) {
+        throw new Error("Je account is nog niet gekoppeld aan een Normly-gebruiker.");
+      }
+      if (!userRow.actief) {
+        throw new Error("Je Normly-account is gedeactiveerd.");
+      }
+
+      const org = userRow.organisatie;
+      if (!org || !(org.actieve_modules || []).includes("werkbonnen")) {
+        throw new Error("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");
+      }
+
+      const roleRows = await rest(
+        "werkbon_gebruiker?select=rol&gebruiker_id=eq." + encodeURIComponent(userRow.id)
+      );
+      const wbRole = roleRows?.[0];
+      if (!wbRole) throw new Error("Je account heeft nog geen Werkbonnen-rol.");
+
+      $("userBadge").textContent = userRow.naam || userRow.email || storedUser.email || "";
+      $("orgLabel").textContent = org.naam || "";
+      $("roleLabel").textContent = wbRole.rol || "";
+      showPortal();
+      await loadWorkorders();
+      return true;
+    }
+
+    async function loadWorkorders() {
+      accessMessage.textContent = "";
+      accessMessage.classList.remove("error");
+
+      const rows = await rest(
+        "werkbon?select=id,nummer,titel,omschrijving,prioriteit,status,gepland_op,gepland_van,gepland_tot,klant:klant_id(naam)&order=gepland_op.asc&order=nummer.desc"
+      );
+
+      const data = rows || [];
+      const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+      $("openCount").textContent = data.filter(r => !["afgerond", "gefactureerd"].includes(r.status)).length;
+      $("todayCount").textContent = data.filter(r => r.gepland_op === today).length;
+      $("doneCount").textContent = data.filter(r => ["afgerond", "gefactureerd"].includes(r.status)).length;
+
+      const container = $("workorders");
+      if (!data.length) {
+        container.innerHTML = '<div class="empty">Er zijn nog geen werkbonnen beschikbaar.</div>';
+        return;
+      }
+
+      container.innerHTML = data.map(r => {
+        const date = r.gepland_op
+          ? new Intl.DateTimeFormat("nl-NL", { dateStyle: "medium" }).format(new Date(r.gepland_op + "T00:00:00"))
+          : "Nog niet gepland";
+        const klant = r.klant?.naam ? " · " + escapeHtml(r.klant.naam) : "";
+        return '<article class="workorder"><div><h3>' +
+          escapeHtml(r.nummer) + " — " + escapeHtml(r.titel) +
+          '</h3><p>' + date + klant +
+          '</p></div><span class="status">' +
+          escapeHtml(String(r.status || "").replaceAll("_", " ")) +
+          "</span></article>";
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", """: "&quot;", "'": "&#039;"
+      }[c]));
+    }
+
+    async function login() {
+      loginMessage.classList.remove("error");
+      loginMessage.textContent = "Bezig met inloggen...";
+      $("loginButton").disabled = true;
+
+      try {
+        const email = $("email").value.trim();
+        const password = $("password").value;
+
+        if (!email || !password) {
+          throw new Error("Vul je e-mailadres en wachtwoord in.");
+        }
+
+        const session = await authRequest(email, password);
+        accessToken = session.access_token;
+        sessionStorage.setItem("normly_workbon_access", accessToken);
+        sessionStorage.setItem("normly_workbon_user", JSON.stringify(session.user || {}));
+
+        await loadProfile();
+      } catch (error) {
+        accessToken = "";
+        sessionStorage.removeItem("normly_workbon_access");
+        sessionStorage.removeItem("normly_workbon_user");
+        messageError(error?.message || "Inloggen mislukt.");
+      } finally {
+        $("loginButton").disabled = false;
+      }
+    }
+
+    $("loginButton").addEventListener("click", login);
+
+    $("password").addEventListener("keydown", event => {
+      if (event.key === "Enter") login();
+    });
+
+    $("refreshButton").addEventListener("click", async () => {
+      try {
+        await loadWorkorders();
+      } catch (error) {
+        accessMessage.textContent = "Werkbonnen konden niet worden geladen: " + (error?.message || "onbekende fout");
+        accessMessage.classList.add("error");
+      }
+    });
+
+    $("logoutButton").addEventListener("click", () => {
+      accessToken = "";
+      sessionStorage.removeItem("normly_workbon_access");
+      sessionStorage.removeItem("normly_workbon_user");
+      showLogin("Je bent uitgelogd.");
+    });
+
+    $("resetButton").addEventListener("click", async () => {
+      const email = $("email").value.trim();
+      if (!email) {
+        loginMessage.textContent = "Vul eerst je e-mailadres in.";
+        return;
+      }
+
+      try {
+        const response = await fetch(SUPABASE_URL + "/auth/v1/recover", {
+          method: "POST",
+          headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        if (!response.ok) throw new Error();
+        loginMessage.textContent = "Als dit account bestaat, ontvang je een e-mail om je wachtwoord te wijzigen.";
+      } catch {
+        messageError("Wachtwoord resetten is niet gelukt.");
+      }
+    });
+
+    window.addEventListener("error", event => {
+      if (!loginView.hidden) messageError("Technische fout: " + (event.message || "onbekende fout"));
+    });
+
+    (async () => {
+      if (!accessToken) return;
+
+      try {
+        await loadProfile();
+      } catch (error) {
+        accessToken = "";
+        sessionStorage.removeItem("normly_workbon_access");
+        sessionStorage.removeItem("normly_workbon_user");
+        showLogin();
+      }
+    })();
+  </script>
 </body>
 </html>
