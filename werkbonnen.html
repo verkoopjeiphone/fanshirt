@@ -36,8 +36,10 @@
 <div id="accessMessage" class="message"></div>
 <div class="stats"><article><span>Openstaand</span><strong id="openCount">0</strong></article><article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article><article><span>Gepland / onderweg</span><strong id="plannedCount">0</strong></article><article><span>Afgerond</span><strong id="doneCount">0</strong></article></div>
 <section id="inbox" class="panel input-panel">
-<div class="panel-heading"><div><span class="eyebrow">Opdrachtinbox</span><h2>Ontvangen opdrachten</h2><p class="muted">Zet een e-mail, tekening of opdrachttekst om naar een duidelijk werkbonvoorstel.</p></div><button id="newInputButton" class="secondary">+ Nieuwe opdracht</button></div>
+<div class="panel-heading"><div><span class="eyebrow">Binnenkomend</span><h2>Opdrachten</h2><p class="muted">Nieuwe aanvragen uit e-mail, formulieren, tekeningen en andere bronnen komen hier binnen voordat ze werkbon worden.</p></div><button id="newInputButton" class="secondary">+ Handmatige opdracht</button></div>
+<div class="inbox-toolbar"><div class="inbox-filters" role="tablist"><button class="inbox-filter active" data-inbox-filter="alle">Alle <span id="inboxCountAll">0</span></button><button class="inbox-filter" data-inbox-filter="nieuw">Nieuw <span id="inboxCountNew">0</span></button><button class="inbox-filter" data-inbox-filter="te_beoordelen">Te beoordelen <span id="inboxCountReview">0</span></button><button class="inbox-filter" data-inbox-filter="wacht_op_info">Wacht op info <span id="inboxCountWait">0</span></button></div><div class="inbox-search"><input id="inboxSearch" placeholder="Zoek in opdrachten…"></div></div>
 <div id="demoInputs" class="input-grid"></div>
+<div id="inboxEmpty" class="empty" hidden><strong>Geen binnenkomende opdrachten</strong><span>Nieuwe e-mails en aanvragen verschijnen hier automatisch.</span></div>
 </section>
 <section id="workordersPanel" class="panel"><div class="panel-heading"><div><h2>Werkbonnen</h2><p class="muted">Open een werkbon om planning, uitvoering, uren, materialen en foto's te beheren.</p></div><span id="roleLabel" class="role"></span></div><div id="workorders" class="workorders"></div></section>
 </div></div></div>
@@ -81,6 +83,7 @@
 </aside>
 </div></div></div>
 
+<div id="inboxDetailModal" class="modal" hidden><div class="modal-card xwide"><div class="modal-head"><div><span class="eyebrow">Binnenkomende opdracht</span><h2 id="inboxDetailTitle"></h2><div class="detail-meta"><span id="inboxDetailSource" class="status"></span><span id="inboxDetailReceived"></span></div></div><button class="close" data-close-modal="inboxDetailModal">×</button></div><div class="inbox-detail-grid"><section><div class="detail-card"><h3>Bericht</h3><div id="inboxDetailBody" class="inbox-body"></div><div id="inboxDetailAttachments" class="attachment-list"></div></div></section><aside><div class="detail-card"><h3>Voorgestelde werkbon</h3><div id="inboxSuggested" class="suggested-fields"></div><div class="form-actions"><button id="inboxReject" class="secondary" type="button">Afwijzen</button><button id="inboxConvert" class="primary" type="button">Werkbon aanmaken</button></div></div><div class="detail-card"><label for="inboxStatusSelect">Status</label><select id="inboxStatusSelect"><option value="nieuw">Nieuw</option><option value="te_beoordelen">Te beoordelen</option><option value="wacht_op_info">Wacht op info</option><option value="afgewezen">Afgewezen</option></select><textarea id="inboxNote" rows="4" placeholder="Interne notitie"></textarea><button id="inboxSaveStatus" class="secondary" type="button">Opslaan</button></div></aside></div></div></div>
 <div id="inputModal" class="modal" hidden><div class="modal-card wide"><div class="modal-head"><div><span class="eyebrow">Nieuwe opdracht</span><h2>Opdracht omzetten naar werkbon</h2></div><button class="close" data-close-modal="inputModal">×</button></div>
 <form id="inputForm" class="form-grid">
 <div class="field"><label for="inputType">Bron</label><select id="inputType"><option value="mail">E-mail</option><option value="tekening">Tekening</option><option value="tekst">Vrije tekst</option></select></div>
@@ -97,7 +100,7 @@
 <section class="detail-card full"><h3>Werkbonrollen</h3><p class="muted">Geef medewerkers de juiste werkbonrol. Alleen actieve gebruikers met een rol krijgen toegang tot het portaal.</p><div id="employeeRoles" class="data-list"></div></section>
 </div></div></div>
 
-<script src="js/werkbonnen.js?v=20260919-login-debug-3"></script>
+<script src="js/werkbonnen.js?v=20260919-inbox-1"></script>
 <script>
 (function(){
   const U="https://oycmdwxmlhchftlunbem.supabase.co", K="sb_publishable_jt7eY4iVp3rrT40D6toWpQ_1NcOO0mU";
