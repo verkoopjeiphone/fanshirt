@@ -121,7 +121,7 @@
       try{
         if(typeof loadProfile!=="function") throw new Error("De Werkbonnen-code is niet geladen. Ververs de pagina volledig.");
         await loadProfile();
-        if(!$("portalView").hidden) msg("",false);
+        if(!$("portalView").hidden) { msg("",false); window.location.href="normly-start.html?v=20260919-1"; }
       }catch(e){
         var lv=document.getElementById("loginView"),pv=document.getElementById("portalView");
         if(lv)lv.hidden=false;
