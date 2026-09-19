@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Werkbonnen | Normly</title><meta name="build" content="2026-09-19-werkbonnen-professional-1">
 <meta name="description" content="Normly Werkbonnen-portaal">
-<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/werkbonnen.css?v=20260919-professional-1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/werkbonnen.css?v=20260919-pro-2">
 </head>
 <body>
 <main class="portal-shell">
@@ -18,18 +18,30 @@
 </section>
 
 <section id="portalView" class="portal" hidden>
-<header class="topbar"><div><a class="brand" href="/">Normly</a><span class="portal-name">Werkbonnen</span></div>
-<div class="topbar-actions"><span id="userBadge" class="user-badge"></span><button id="manageButton" class="secondary" hidden>Beheer</button><button id="logoutButton" class="secondary">Uitloggen</button></div></header>
-<div class="portal-content">
-<div class="page-heading"><div><span class="eyebrow">Werkbonnen</span><h1>Werkbonnenoverzicht</h1><p id="orgLabel" class="muted"></p></div><div class="heading-actions"><button id="refreshButton" class="secondary">Verversen</button><button id="newWorkorderButton" class="primary">+ Nieuwe werkbon</button></div></div>
+<div class="app-layout">
+<aside class="app-sidebar">
+  <div class="side-brand"><a class="brand" href="/">Normly</a><span>WERKBONNEN</span></div>
+  <nav class="side-nav" aria-label="Hoofdnavigatie">
+    <button class="side-nav-item active" data-scroll="dashboard"><span class="nav-icon">⌂</span>Overzicht</button>
+    <button class="side-nav-item" data-scroll="inbox"><span class="nav-icon">↗</span>Opdrachtinbox</button>
+    <button class="side-nav-item" data-scroll="workorders"><span class="nav-icon">☷</span>Werkbonnen</button>
+    <button id="sideManageButton" class="side-nav-item" hidden><span class="nav-icon">⚙</span>Beheer</button>
+  </nav>
+  <div class="side-footer"><div class="side-user"><span class="side-avatar" id="sideAvatar">S</span><div><strong id="sideUserName">Stan</strong><small>Beheerder</small></div></div><button id="logoutButton" class="side-logout">Uitloggen</button></div>
+</aside>
+<div class="app-main">
+<header class="app-header"><div><span class="header-kicker">Normly / Werkbonnen</span><strong>Werkbeheer</strong></div><div class="header-actions"><span id="userBadge" class="user-badge"></span><button id="manageButton" class="secondary" hidden>Beheer</button><button id="refreshButton" class="secondary">Verversen</button></div></header>
+<div class="portal-content" id="dashboard">
+<div class="page-heading"><div><span class="eyebrow">Vandaag</span><h1>Werkbonnenoverzicht</h1><p id="orgLabel" class="muted"></p></div><div class="heading-actions"><button id="refreshButton" class="secondary">Verversen</button><button id="newWorkorderButton" class="primary">+ Nieuwe werkbon</button></div></div>
 <div id="accessMessage" class="message"></div>
 <div class="stats"><article><span>Openstaand</span><strong id="openCount">0</strong></article><article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article><article><span>Gepland / onderweg</span><strong id="plannedCount">0</strong></article><article><span>Afgerond</span><strong id="doneCount">0</strong></article></div>
-<section class="panel input-panel">
+<section id="inbox" class="panel input-panel">
 <div class="panel-heading"><div><span class="eyebrow">Opdrachtinbox</span><h2>Ontvangen opdrachten</h2><p class="muted">Zet een e-mail, tekening of opdrachttekst om naar een duidelijk werkbonvoorstel.</p></div><button id="newInputButton" class="secondary">+ Nieuwe opdracht</button></div>
 <div id="demoInputs" class="input-grid"></div>
 </section>
-<section class="panel"><div class="panel-heading"><div><h2>Werkbonnen</h2><p class="muted">Open een werkbon om planning, uitvoering, uren, materialen en foto's te beheren.</p></div><span id="roleLabel" class="role"></span></div><div id="workorders" class="workorders"></div></section>
-</div></section>
+<section id="workorders" class="panel"><div class="panel-heading"><div><h2>Werkbonnen</h2><p class="muted">Open een werkbon om planning, uitvoering, uren, materialen en foto's te beheren.</p></div><span id="roleLabel" class="role"></span></div><div id="workorders" class="workorders"></div></section>
+</div></div></div>
+</section>
 </main>
 
 <div id="newModal" class="modal" hidden><div class="modal-card wide"><div class="modal-head"><div><span class="eyebrow">Nieuwe werkbon</span><h2>Werkbon aanmaken</h2></div><button class="close" data-close-modal="newModal">×</button></div>
