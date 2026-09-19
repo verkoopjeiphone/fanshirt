@@ -102,11 +102,14 @@
       sessionStorage.setItem("normly_workbon_user",JSON.stringify(s.user||{}));
       accessToken=s.access_token; sessionUser=s.user||{};
       try{
+        if(typeof loadProfile!=="function") throw new Error("De Werkbonnen-code is niet geladen. Ververs de pagina volledig.");
         await loadProfile();
         if(!$("portalView").hidden) msg("",false);
       }catch(e){
-        showLogin();
-        msg("Inloggen gelukt, maar het profiel kon niet worden geladen: "+(e.message||"onbekende fout"),true);
+        var lv=document.getElementById("loginView"),pv=document.getElementById("portalView");
+        if(lv)lv.hidden=false;
+        if(pv)pv.hidden=true;
+        msg("Inloggen gelukt, maar het profiel kon niet worden geladen: "+(e&&e.message||"onbekende fout"),true);
         console.error("Werkbonnen login/profile:",e);
       }
     }catch(e){msg(e.message||"Inloggen mislukt.",true)}
