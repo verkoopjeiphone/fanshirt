@@ -12,6 +12,35 @@ const DEMO_INPUTS=[
  {type:"tekening",source:"Tekening",klant:"DEMO-1001",title:"Onderhoud LBK-01",body:"Technische ruimte dak. Luchtbehandelingskast LBK-01. Reinig filters, controleer ventilator en riemaandrijving. Vervang filters indien nodig.",priority:"normaal",soort:"Onderhoud"},
  {type:"mail",source:"E-mail",klant:"DEMO-1004",title:"Klimaatklacht tweede verdieping",body:"In drie kantoorruimten op de tweede verdieping is het te warm. Graag regeling, sensoren en luchtverdeling controleren. Bel Lisa kort voor aankomst.",priority:"hoog",soort:"Storing"}
 ];
+let inboxItems=[], inboxFilter="alle", inboxSearch="";
+function inboxSourceLabel(v){return ({email:"E-mail",formulier:"Formulier",tekening:"Tekening",api:"API",handmatig:"Handmatig"}[v]||v||"Opdracht")}
+function inboxStatusLabel(v){return ({nieuw:"Nieuw",te_beoordelen:"Te beoordelen",wacht_op_info:"Wacht op info",omgezet:"Omgezet",afgewezen:"Afgewezen"}[v]||v)}
+function renderInbox(){
+ const el=$("demoInputs"); if(!el)return;
+ const q=inboxSearch.toLowerCase();
+ const rows=inboxItems.filter(x=>(inboxFilter==="alle"||x.status===inboxFilter)&&(!q||[x.onderwerp,x.afzender_naam,x.afzender_email,x.inhoud].join(" ").toLowerCase().includes(q)));
+ $("inboxCountAll").textContent=inboxItems.length;
+ $("inboxCountNew").textContent=inboxItems.filter(x=>x.status==="nieuw").length;
+ $("inboxCountReview").textContent=inboxItems.filter(x=>x.status==="te_beoordelen").length;
+ $("inboxCountWait").textContent=inboxItems.filter(x=>x.status==="wacht_op_info").length;
+ $("inboxEmpty").hidden=rows.length>0;
+ el.innerHTML=rows.map(x=>{const s=x.voorgestelde_gegevens||{},when=x.ontvangen_op?new Date(x.ontvangen_op).toLocaleString("nl-NL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";return '<article class="inbox-row"><div class="inbox-row-icon">'+(x.bron==="email"?"✉":x.bron==="tekening"?"⌁":x.bron==="formulier"?"↗":"•")+'</div><div class="inbox-row-main"><div class="inbox-row-top"><span class="input-type">'+esc(inboxSourceLabel(x.bron))+'</span><span class="status status-'+esc(x.status)+'">'+esc(inboxStatusLabel(x.status))+'</span></div><h3>'+esc(x.onderwerp||"Nieuwe opdracht")+'</h3><p>'+esc(x.afzender_naam||x.afzender_email||"Onbekende afzender")+' · '+esc(when)+(s.klant_naam?" · "+esc(s.klant_naam):"")+'</p><small>'+esc((x.inhoud||"").replace(/\s+/g," ").slice(0,150))+(x.inhoud&&x.inhoud.length>150?"…":"")+'</small></div><button class="secondary inbox-open" data-inbox-id="'+esc(x.id)+'">Bekijken</button></article>'}).join("");
+ document.querySelectorAll(".inbox-open").forEach(b=>b.onclick=()=>openInboxItem(b.dataset.inboxId));
+}
+async function loadInbox(){try{inboxItems=await rest("werkbon_opdracht_inbox?select=*&order=ontvangen_op.desc")||[];renderInbox()}catch(e){err($("accessMessage"),e.message||"Opdrachten konden niet worden geladen.")}}
+async function openInboxItem(id){
+ const x=inboxItems.find(v=>v.id===id);if(!x)return;const s=x.voorgestelde_gegevens||{};
+ $("inboxDetailTitle").textContent=x.onderwerp||"Nieuwe opdracht";$("inboxDetailSource").textContent=inboxSourceLabel(x.bron);$("inboxDetailReceived").textContent=x.ontvangen_op?new Date(x.ontvangen_op).toLocaleString("nl-NL"):"";$("inboxDetailBody").textContent=x.inhoud||"Geen berichtinhoud.";
+ const atts=Array.isArray(x.bijlagen)?x.bijlagen:[];$("inboxDetailAttachments").innerHTML=atts.length?atts.map(a=>'<div class="attachment"><span>📎</span><div><strong>'+esc(a.name||"Bijlage")+'</strong><small>'+esc(a.type||"Bestand")+'</small></div></div>').join(""):"";
+ $("inboxSuggested").innerHTML='<div><span>Klant</span><strong>'+esc(s.klant_naam||"Nog niet herkend")+'</strong></div><div><span>Locatie</span><strong>'+esc(s.locatie||"Nog niet herkend")+'</strong></div><div><span>Werksoort</span><strong>'+esc(s.soort_werk||"Werkzaamheden")+'</strong></div><div><span>Prioriteit</span><strong>'+esc(s.prioriteit||"Normaal")+'</strong></div>';$("inboxStatusSelect").value=x.status;$("inboxNote").value=x.opmerkingen||"";
+ $("inboxConvert").onclick=()=>convertInboxToWorkorder(x.id);$("inboxReject").onclick=()=>updateInboxStatus(x.id,"afgewezen");$("inboxSaveStatus").onclick=async()=>{await updateInboxStatus(x.id,$("inboxStatusSelect").value,$("inboxNote").value);closeModal("inboxDetailModal")};openModal("inboxDetailModal");
+}
+async function updateInboxStatus(id,status,note){try{await rest("werkbon_opdracht_inbox?id=eq."+encodeURIComponent(id),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({status:status,opmerkingen:note||null})});await loadInbox()}catch(e){err($("accessMessage"),e.message||"Opdracht bijwerken mislukt.")}}
+async function convertInboxToWorkorder(id){
+ const x=inboxItems.find(v=>v.id===id);if(!x)return;try{const s=x.voorgestelde_gegevens||{},k=customers.find(c=>c.id===s.klant_id),cp=contacts.find(c=>c.klant_id===k?.id),o=objects.find(o=>o.id===s.object_id)||objects.find(o=>o.klant_id===k?.id);
+ const p={organisatie_id:profile.organisatie_id,klant_id:k?.id||null,contactpersoon_id:cp?.id||null,object_id:o?.id||null,titel:x.onderwerp||"Nieuwe opdracht",omschrijving:x.inhoud||null,soort_werk:s.soort_werk||"Werkzaamheden",prioriteit:s.prioriteit||"normaal",status:"concept",aangemaakt_door:profile.id,opmerking_intern:"Binnengekomen via "+inboxSourceLabel(x.bron)+(x.afzender_email?" · "+x.afzender_email:""),factuurstatus:"te_factureren"};
+ const made=await rest("werkbon",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify(p)});if(made?.[0]?.id)await rest("werkbon_opdracht_inbox?id=eq."+encodeURIComponent(id),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({status:"omgezet",werkbon_id:made[0].id})});closeModal("inboxDetailModal");await loadInbox();await list();if(made?.[0]?.id)await openWorkorder(made[0].id);
+ }catch(e){err($("accessMessage"),e.message||"Werkbon aanmaken mislukt.")}}
 function renderDemoInputs(){
  const el=$("demoInputs"); if(!el)return;
  el.innerHTML=DEMO_INPUTS.map((x,i)=>'<article class="input-card"><div class="input-card-head"><span class="input-type">'+esc(x.source)+'</span><span class="priority priority-'+esc(x.priority)+'">'+esc(x.priority)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.body.slice(0,145))+(x.body.length>145?'…':'')+'</p>'+(x.type==='tekening'?'<div class="drawing-mini"><span>TECHNISCHE TEKENING</span><i></i><b></b><em>LP / LBK</em></div>':'<div class="mail-mini"><strong>Van</strong><span>'+esc(x.klant==='DEMO-1002'?'Sophie de Ruiter':x.klant==='DEMO-1005'?'Peter Visser':'Techniek / beheer')+'</span><small>Opdracht ontvangen</small></div>')+'<button class="secondary input-action" data-input-index="'+i+'">Maak werkbon van deze input</button></article>').join('');
@@ -43,9 +72,8 @@ async function createFromManualInput(e){
   const lower=(title+' '+body).toLowerCase();
   const soort=lower.includes('inspect')||lower.includes('tekening')?'Inspectie':lower.includes('onderhoud')||lower.includes('filter')?'Onderhoud':lower.includes('lekk')||lower.includes('storing')||lower.includes('uitval')?'Storing':'Werkzaamheden';
   const priority=lower.includes('spoed')||lower.includes('vandaag')?'spoed':lower.includes('urgent')||lower.includes('direct')?'hoog':'normaal';
-  const p={organisatie_id:profile.organisatie_id,klant_id:k?.id||null,contactpersoon_id:cp?.id||null,object_id:o?.id||null,titel:'DEMO | '+title,omschrijving:body,soort_werk:soort,prioriteit:priority,status:'concept',aangemaakt_door:profile.id,opmerking_intern:'Bron: '+$("inputType").value+(file?' · Bijlage: '+file.name:'')+'. Demo-voorstel; controleer de voorgestelde gegevens voordat de werkbon wordt ingepland.',factuurstatus:'te_factureren'};
-  const made=await rest('werkbon',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify(p)});
-  closeModal('inputModal');await list();if(made?.[0]?.id)await openWorkorder(made[0].id);
+  const made=await rest('werkbon_opdracht_inbox',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify({organisatie_id:profile.organisatie_id,bron:$("inputType").value==="mail"?"email":$("inputType").value==="tekening"?"tekening":"handmatig",status:"nieuw",onderwerp:title,inhoud:body,afzender_naam:"Handmatige invoer",voorgestelde_gegevens:{klant_id:k?.id||null,klant_naam:k?.naam||null,soort_werk:soort,prioriteit:priority,object_id:o?.id||null},bijlagen:file?[{name:file.name,type:file.type||"Bestand"}]:[]})});
+  closeModal('inputModal');await loadInbox();
  }catch(e){err($("inputMessage"),e.message||'Werkbonvoorstel maken mislukt.')}
 }
 
@@ -67,7 +95,7 @@ async function loadProfile(){
  if(!u||!u.actief)throw new Error("Je Normly-account is niet actief of niet gekoppeld.");
  if(!u.organisatie||(u.organisatie.actieve_modules||[]).indexOf("werkbonnen")<0)throw new Error("Werkbonnen is voor jouw organisatie nog niet geactiveerd.");
  const rr=await rest("werkbon_gebruiker?select=rol&gebruiker_id=eq."+encodeURIComponent(u.id));wbRole=rr?.[0]?.rol;if(!wbRole)throw new Error("Je account heeft nog geen Werkbonnen-rol.");
- profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();try{await refs();renderDemoInputs();await list()}catch(e){err($("accessMessage"),"Inloggen gelukt, maar gegevens laden mislukt: "+(e.message||"onbekende fout"));console.error("Werkbonnen initialisatie:",e)}return true
+ profile=u;$("userBadge").textContent=u.naam||u.email||"";$("orgLabel").textContent=u.organisatie.naam||"";$("roleLabel").textContent=ROLE_LABELS[wbRole]||wbRole;$("newWorkorderButton").hidden=!office();$("manageButton").hidden=!admin();showPortal();try{await refs();await loadInbox();renderDemoInputs();await list()}catch(e){err($("accessMessage"),"Inloggen gelukt, maar gegevens laden mislukt: "+(e.message||"onbekende fout"));console.error("Werkbonnen initialisatie:",e)}return true
 }
 async function refs(){
  [customers,employees]=await Promise.all([
@@ -147,8 +175,8 @@ document.addEventListener("DOMContentLoaded",()=>{
  $("resetButton").onclick=async()=>{const email=$("email").value.trim();if(!email){$("loginMessage").textContent="Vul eerst je e-mailadres in.";return}try{const r=await fetch(SUPABASE_URL+"/auth/v1/recover",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email})});$("loginMessage").textContent=r.ok?"Als dit account bestaat, ontvang je een e-mail om je wachtwoord te wijzigen.":"Wachtwoord resetten is niet gelukt."}catch(e){err($("loginMessage"),"Wachtwoord resetten is niet gelukt.")}};
  $("loginButton").onclick=async()=>{try{$("loginMessage").textContent="Bezig met inloggen...";const s=await authRequest($("email").value.trim(),$("password").value);accessToken=s.access_token;sessionUser=s.user;sessionStorage.setItem("normly_workbon_access",accessToken);sessionStorage.setItem("normly_workbon_user",JSON.stringify(sessionUser));await loadProfile()}catch(e){accessToken="";sessionStorage.removeItem("normly_workbon_access");sessionStorage.removeItem("normly_workbon_user");err($("loginMessage"),e.message||"Inloggen mislukt.")}};
  $("password").onkeydown=e=>{if(e.key==="Enter")$("loginButton").click()};$("logoutButton").onclick=()=>{accessToken="";sessionUser=null;sessionStorage.removeItem("normly_workbon_access");sessionStorage.removeItem("normly_workbon_user");showLogin("Je bent uitgelogd.")};
- $("refreshButton").onclick=async()=>{try{await refs();renderDemoInputs();await list()}catch(e){err($("accessMessage"),e.message||"Verversen mislukt.")}};
- $("newInputButton").onclick=openInputModal;$("inputForm").onsubmit=createFromManualInput;$("newWorkorderButton").onclick=()=>{ $("newForm").reset();$("newMessage").textContent="";renderSelects();openModal("newModal")};
+ $("refreshButton").onclick=async()=>{try{await refs();await loadInbox();renderDemoInputs();await list()}catch(e){err($("accessMessage"),e.message||"Verversen mislukt.")}};
+ $("newInputButton").onclick=openInputModal;document.querySelectorAll(".inbox-filter").forEach(b=>b.onclick=()=>{inboxFilter=b.dataset.inboxFilter;document.querySelectorAll(".inbox-filter").forEach(x=>x.classList.toggle("active",x===b));renderInbox()});$("inboxSearch").oninput=e=>{inboxSearch=e.target.value||"";renderInbox()};$("inputForm").onsubmit=createFromManualInput;$("newWorkorderButton").onclick=()=>{ $("newForm").reset();$("newMessage").textContent="";renderSelects();openModal("newModal")};
  $("newCustomer").onchange=dependentSelects;$("newForm").onsubmit=createWorkorder;$("detailSaveBasic").onclick=saveDetail;$("hourForm").onsubmit=addHours;$("materialForm").onsubmit=addMaterial;$("photoFile").onchange=uploadPhoto;$("saveSignature").onclick=saveSignature;$("clearSignature").onclick=setupSignature;
  $("customerForm").onsubmit=createCustomer;$("objectForm").onsubmit=createObject;
  $("manageButton").onclick=async()=>{openModal("manageModal");$("manageMessage").textContent="";$("objectCustomer").innerHTML='<option value="">Geen klant</option>'+customers.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.naam)+"</option>").join("");await employeeRoles()};
