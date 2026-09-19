@@ -53,3 +53,34 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .modal{background:rgba(16,31,45,.45);backdrop-filter:blur(2px)}.modal-card{border-radius:8px;box-shadow:0 18px 50px rgba(16,42,67,.18);padding:22px}.modal-head h2{font-size:18px}
 @media(max-width:850px){.app-layout{grid-template-columns:1fr}.app-sidebar{position:relative;height:auto;padding:12px 14px;display:block}.side-brand{border:0;padding:3px 4px 10px}.side-nav{display:flex;flex-direction:row;padding:0;overflow:auto}.side-nav-item{width:auto;white-space:nowrap}.side-footer{display:none}.app-header{display:none}.app-main .portal-content{width:calc(100% - 24px);padding:18px 0 40px}.stats{grid-template-columns:repeat(2,1fr)}.stats article:nth-child(2){border-right:0}.stats article{border-bottom:1px solid #e5e9ed}.page-heading{align-items:flex-start;gap:12px;flex-direction:column}}
 @media(max-width:520px){.page-heading h1{font-size:22px}.heading-actions{width:100%}.heading-actions button{flex:1}.input-panel .input-grid{grid-template-columns:1fr}.stats strong{font-size:21px}}
+
+/* Real intake workspace */
+.inbox-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid #e3e9ef;border-bottom:1px solid #e3e9ef;margin:0 0 4px}
+.inbox-filters{display:flex;gap:4px;flex-wrap:wrap}
+.inbox-filter{background:transparent;color:#5d6b7c;padding:8px 10px;border-radius:6px;font-size:.84rem}
+.inbox-filter span{display:inline-flex;min-width:20px;justify-content:center;margin-left:5px;color:#788697;font-size:.76rem}
+.inbox-filter.active{background:#edf2f6;color:#173b61}
+.inbox-search{width:min(280px,100%)}
+.inbox-search input{padding:9px 12px;border-radius:7px;background:#fff}
+.inbox-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:16px;align-items:center;padding:17px 0;border-bottom:1px solid #e6ebf0}
+.inbox-row-icon{width:38px;height:38px;border:1px solid #d8e0e8;display:grid;place-items:center;border-radius:8px;background:#f8fafb;color:#294b6d;font-weight:700}
+.inbox-row-main{min-width:0}
+.inbox-row-top{display:flex;gap:8px;align-items:center;margin-bottom:3px}
+.inbox-row h3{font-size:1rem;margin:3px 0 4px;color:#16263a}
+.inbox-row p{margin:0;color:#68778a;font-size:.83rem}
+.inbox-row small{display:block;color:#8491a0;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inbox-row .secondary{margin:0;white-space:nowrap}
+.status-status{background:#eef2f5}
+.status-nieuw{background:#eaf2fb;color:#1f5c8f}
+.status-te_beoordelen{background:#f5f0df;color:#725c17}
+.status-wacht_op_info{background:#f3edf9;color:#654a82}
+.status-omgezet{background:#e9f3ed;color:#2f6845}
+.inbox-detail-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr);gap:18px}
+.inbox-body{white-space:pre-wrap;line-height:1.7;color:#26374a;min-height:180px}
+.attachment-list{display:grid;gap:8px;margin-top:20px}
+.attachment{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #e0e6ec;background:#fafbfd}
+.attachment small,.suggested-fields span{display:block;color:#7b8998;font-size:.76rem}
+.suggested-fields{display:grid;gap:0;border-top:1px solid #e3e8ed;margin-bottom:18px}
+.suggested-fields>div{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid #e3e8ed}
+.suggested-fields strong{font-size:.86rem;text-align:right}
+@media(max-width:800px){.inbox-toolbar{align-items:stretch;flex-direction:column}.inbox-search{width:100%}.inbox-row{grid-template-columns:34px minmax(0,1fr)}.inbox-row .secondary{grid-column:2;justify-self:start}.inbox-detail-grid{grid-template-columns:1fr}}
