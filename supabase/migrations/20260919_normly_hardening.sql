@@ -14,3 +14,5 @@ alter function public.huidige_rol() set search_path = public;
 alter function public.log_audit_trail() set search_path = public;
 alter function public.maak_actiepunt_bij_afwijking() set search_path = public;
 alter function public.set_updated_at() set search_path = public;
+
+revoke all on table public.werkbon_nummerreeks from anon, authenticated;
