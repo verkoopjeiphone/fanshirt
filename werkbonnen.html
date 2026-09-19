@@ -2,15 +2,15 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Werkbonnen | Normly</title><meta name="build" content="2026-09-18-werkbonnen-demo-2">
+<title>Werkbonnen | Normly</title><meta name="build" content="2026-09-19-werkbonnen-professional-1">
 <meta name="description" content="Normly Werkbonnen-portaal">
-<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/werkbonnen.css?v=20260918-demo-2">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/werkbonnen.css?v=20260919-professional-1">
 </head>
 <body>
 <main class="portal-shell">
 <section id="loginView" class="auth-card">
 <a class="brand" href="/">Normly</a><span class="eyebrow">Werkbonnen</span>
-<h1>Inloggen op het Werkbonnen-portaal</h1><p class="muted">Gebruik je Normly-account om werkbonnen te plannen, uit te voeren en af te ronden.</p>
+<h1>Inloggen op Normly Werkbonnen</h1><p class="muted">Beheer, plan en rond werkzaamheden af vanuit één overzichtelijke werkomgeving.</p>
 <label for="email">E-mailadres</label><input id="email" type="email" autocomplete="username" required>
 <label for="password">Wachtwoord</label><input id="password" type="password" autocomplete="current-password" required>
 <button id="loginButton" class="primary" type="button">Inloggen</button><button id="resetButton" class="text-button" type="button">Wachtwoord vergeten?</button>
@@ -21,13 +21,14 @@
 <header class="topbar"><div><a class="brand" href="/">Normly</a><span class="portal-name">Werkbonnen</span></div>
 <div class="topbar-actions"><span id="userBadge" class="user-badge"></span><button id="manageButton" class="secondary" hidden>Beheer</button><button id="logoutButton" class="secondary">Uitloggen</button></div></header>
 <div class="portal-content">
-<div class="page-heading"><div><span class="eyebrow">Werkbonnen</span><h1>Overzicht</h1><p id="orgLabel" class="muted"></p></div><div class="heading-actions"><button id="refreshButton" class="secondary">Verversen</button><button id="newWorkorderButton" class="primary">+ Nieuwe werkbon</button></div></div>
+<div class="page-heading"><div><span class="eyebrow">Werkbonnen</span><h1>Werkbonnenoverzicht</h1><p id="orgLabel" class="muted"></p></div><div class="heading-actions"><button id="refreshButton" class="secondary">Verversen</button><button id="newWorkorderButton" class="primary">+ Nieuwe werkbon</button></div></div>
 <div id="accessMessage" class="message"></div>
-<div class="stats"><article><span>Open</span><strong id="openCount">0</strong></article><article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article><article><span>In uitvoering / gepland</span><strong id="plannedCount">0</strong></article><article><span>Afgerond</span><strong id="doneCount">0</strong></article></div>
+<div class="stats"><article><span>Openstaand</span><strong id="openCount">0</strong></article><article><span>Vandaag gepland</span><strong id="todayCount">0</strong></article><article><span>Gepland / onderweg</span><strong id="plannedCount">0</strong></article><article><span>Afgerond</span><strong id="doneCount">0</strong></article></div>
 <section class="panel input-panel">
-<div class="panel-heading"><div><span class="eyebrow">Input → Werkbon</span><h2>Opdrachtinbox</h2><p class="muted">Laat zien hoe een mail, tekening of vrije tekst als uitgangspunt voor een werkbon kan dienen.</p></div><button id="newInputButton" class="secondary">+ Nieuwe input</button></div>
+<div class="panel-heading"><div><span class="eyebrow">Opdrachtinbox</span><h2>Ontvangen opdrachten</h2><p class="muted">Zet een e-mail, tekening of opdrachttekst om naar een duidelijk werkbonvoorstel.</p></div><button id="newInputButton" class="secondary">+ Nieuwe opdracht</button></div>
 <div id="demoInputs" class="input-grid"></div>
-</section>\n<section class="panel"><div class="panel-heading"><div><h2>Werkbonnen</h2><p class="muted">Klik op een werkbon voor de volledige uitvoering.</p></div><span id="roleLabel" class="role"></span></div><div id="workorders" class="workorders"></div></section>
+</section>
+<section class="panel"><div class="panel-heading"><div><h2>Werkbonnen</h2><p class="muted">Open een werkbon om planning, uitvoering, uren, materialen en foto's te beheren.</p></div><span id="roleLabel" class="role"></span></div><div id="workorders" class="workorders"></div></section>
 </div></section>
 </main>
 
@@ -68,19 +69,20 @@
 </aside>
 </div></div></div>
 
-<div id="inputModal" class="modal" hidden><div class="modal-card wide"><div class="modal-head"><div><span class="eyebrow">Nieuwe input</span><h2>Input omzetten naar werkbon</h2></div><button class="close" data-close-modal="inputModal">×</button></div>
+<div id="inputModal" class="modal" hidden><div class="modal-card wide"><div class="modal-head"><div><span class="eyebrow">Nieuwe opdracht</span><h2>Opdracht omzetten naar werkbon</h2></div><button class="close" data-close-modal="inputModal">×</button></div>
 <form id="inputForm" class="form-grid">
-<div class="field"><label for="inputType">Type input</label><select id="inputType"><option value="mail">E-mail</option><option value="tekening">Tekening</option><option value="tekst">Vrije tekst</option></select></div>
+<div class="field"><label for="inputType">Bron</label><select id="inputType"><option value="mail">E-mail</option><option value="tekening">Tekening</option><option value="tekst">Vrije tekst</option></select></div>
 <div class="field"><label for="inputCustomer">Klant</label><select id="inputCustomer"></select></div>
 <div class="field full"><label for="inputSubject">Onderwerp / titel</label><input id="inputSubject" placeholder="Bijv. Storing verlichting magazijn"></div>
-<div class="field full"><label for="inputBody">Inhoud van de opdracht</label><textarea id="inputBody" rows="8" placeholder="Plak hier de mail, opdrachttekst of omschrijving uit een tekening."></textarea></div>
-<div class="field full"><label for="inputFile">Bijlage (demo)</label><input id="inputFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg"></div>
-<div class="form-actions full"><span id="inputMessage" class="message"></span><button type="button" class="secondary" data-close-modal="inputModal">Annuleren</button><button id="createFromInputButton" class="primary">Maak werkbonvoorstel</button></div>
-</form></div></div>\n<div id="manageModal" class="modal" hidden><div class="modal-card xwide"><div class="modal-head"><div><span class="eyebrow">Beheer</span><h2>Klanten, objecten en medewerkers</h2></div><button class="close" data-close-modal="manageModal">×</button></div>
+<div class="field full"><label for="inputBody">Opdrachtomschrijving</label><textarea id="inputBody" rows="8" placeholder="Plak hier de mail, opdrachttekst of omschrijving uit een tekening."></textarea></div>
+<div class="field full"><label for="inputFile">Bijlage</label><input id="inputFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg"></div>
+<div class="form-actions full"><span id="inputMessage" class="message"></span><button type="button" class="secondary" data-close-modal="inputModal">Annuleren</button><button id="createFromInputButton" class="primary">Werkbonvoorstel maken</button></div>
+</form></div></div>
+<div id="manageModal" class="modal" hidden><div class="modal-card xwide"><div class="modal-head"><div><span class="eyebrow">Beheer</span><h2>Stamgegevens en medewerkers</h2></div><button class="close" data-close-modal="manageModal">×</button></div>
 <p id="manageMessage" class="message"></p><div class="manage-grid">
 <section class="detail-card"><h3>Nieuwe klant</h3><form id="customerForm" class="form-grid compact"><input id="customerName" required placeholder="Naam klant"><input id="customerNumber" placeholder="Klantnummer"><input id="customerAddress" placeholder="Adres"><input id="customerPostcode" placeholder="Postcode"><input id="customerCity" placeholder="Plaats"><input id="customerEmail" type="email" placeholder="E-mail"><input id="customerPhone" placeholder="Telefoon"><button class="primary full">Klant toevoegen</button></form><div class="subhead">Bestaande klanten</div><div id="customerManageList" class="data-list"></div></section>
 <section class="detail-card"><h3>Nieuw object / locatie</h3><form id="objectForm" class="form-grid compact"><select id="objectCustomer"></select><input id="objectType" required placeholder="Type object"><input id="objectName" required placeholder="Naam object"><input id="objectIdentifier" placeholder="Identificatie"><input id="objectLocation" placeholder="Locatieomschrijving"><button class="primary full">Object toevoegen</button></form></section>
-<section class="detail-card full"><h3>Werkbon-rollen</h3><p class="muted">Beheerder/planner kan medewerkers een rol geven. Alleen gebruikers met een rol kunnen het Werkbonnen-portaal gebruiken.</p><div id="employeeRoles" class="data-list"></div></section>
+<section class="detail-card full"><h3>Werkbonrollen</h3><p class="muted">Geef medewerkers de juiste werkbonrol. Alleen actieve gebruikers met een rol krijgen toegang tot het portaal.</p><div id="employeeRoles" class="data-list"></div></section>
 </div></div></div>
 
 <script src="js/werkbonnen.js?v=20260919-login-debug-3"></script>
