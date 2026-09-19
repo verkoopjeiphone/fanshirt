@@ -6,12 +6,8 @@ let accessToken=sessionStorage.getItem("normly_workbon_access")||"",sessionUser=
 const $=id=>document.getElementById(id),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
 
 const DEMO_INPUTS=[
- {type:"mail",source:"E-mail",klant:"DEMO-1002",title:"Storing bouwplaatsverlichting",body:"Goedemiddag, op onze bouwplaats aan de westzijde vallen sinds vanochtend meerdere lichtarmaturen uit. Kunnen jullie de voeding en armaturen controleren en de storing oplossen? Graag vandaag als dat lukt.
-
-Groet, Sophie de Ruiter",priority:"hoog",soort:"Storing"},
- {type:"mail",source:"E-mail",klant:"DEMO-1005",title:"Lekkage kelder De Horizon",body:"Er is een vochtplek ontstaan bij een leidingdoorvoer in de kelder. Willen jullie de oorzaak controleren en indien mogelijk een tijdelijke maatregel uitvoeren? De sleutelhouder kan op locatie komen.
-
-Met vriendelijke groet, Peter Visser",priority:"spoed",soort:"Storing"},
+ {type:"mail",source:"E-mail",klant:"DEMO-1002",title:"Storing bouwplaatsverlichting",body:"Goedemiddag, op onze bouwplaats aan de westzijde vallen sinds vanochtend meerdere lichtarmaturen uit. Kunnen jullie de voeding en armaturen controleren en de storing oplossen? Graag vandaag als dat lukt.\n\nGroet, Sophie de Ruiter",priority:"hoog",soort:"Storing"},
+ {type:"mail",source:"E-mail",klant:"DEMO-1005",title:"Lekkage kelder De Horizon",body:"Er is een vochtplek ontstaan bij een leidingdoorvoer in de kelder. Willen jullie de oorzaak controleren en indien mogelijk een tijdelijke maatregel uitvoeren? De sleutelhouder kan op locatie komen.\n\nMet vriendelijke groet, Peter Visser",priority:"spoed",soort:"Storing"},
  {type:"tekening",source:"Tekening",klant:"DEMO-1003",title:"Inspectie laadperron 3",body:"Tekening gemarkeerd met LP-03. Controleer de technische voorzieningen rond het laadperron en noteer eventuele afwijkingen in de werkbon. Meetrapport meenemen.",priority:"normaal",soort:"Inspectie"},
  {type:"tekening",source:"Tekening",klant:"DEMO-1001",title:"Onderhoud LBK-01",body:"Technische ruimte dak. Luchtbehandelingskast LBK-01. Reinig filters, controleer ventilator en riemaandrijving. Vervang filters indien nodig.",priority:"normaal",soort:"Onderhoud"},
  {type:"mail",source:"E-mail",klant:"DEMO-1004",title:"Klimaatklacht tweede verdieping",body:"In drie kantoorruimten op de tweede verdieping is het te warm. Graag regeling, sensoren en luchtverdeling controleren. Bel Lisa kort voor aankomst.",priority:"hoog",soort:"Storing"}
