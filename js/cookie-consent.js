@@ -10,6 +10,7 @@
   var GOOGLE_ANALYTICS_MEASUREMENT_ID = "G-DBJM1NH5S3";
   var root;
   var lastFocusedElement;
+  var feedbackTimer;
 
   function readConsent() {
     try {
@@ -117,6 +118,19 @@
     if (lastFocusedElement && typeof lastFocusedElement.focus === "function") lastFocusedElement.focus();
   }
 
+  function showFeedback(message) {
+    if (!root) return;
+    var feedback = root.querySelector(".cookie-consent__feedback");
+    if (!feedback) return;
+
+    window.clearTimeout(feedbackTimer);
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedbackTimer = window.setTimeout(function () {
+      feedback.hidden = true;
+    }, 4500);
+  }
+
   function keepFocusInPreferences(event) {
     var backdrop = root && root.querySelector(".cookie-consent__backdrop");
     if (event.key !== "Tab" || !backdrop || backdrop.hidden) return;
@@ -154,9 +168,11 @@
     closePreferences();
     if (analytics) {
       loadAnalytics();
+      showFeedback("Opgeslagen: bezoekersstatistieken staan aan.");
     } else {
       updateAnalyticsConsent(false);
       removeAnalyticsCookies();
+      showFeedback("Opgeslagen: alleen noodzakelijke cookies.");
     }
   }
 
@@ -171,34 +187,35 @@
     root.innerHTML = [
       '<section class="cookie-consent" aria-label="Cookiekeuze">',
       '<p class="cookie-consent__eyebrow">Jouw privacy</p>',
-      '<h2>Cookies en bezoekersstatistieken</h2>',
-      '<p>We gebruiken noodzakelijke opslag om je keuze te onthouden. Alleen met jouw toestemming meten we welke pagina’s worden bezocht.</p>',
-      '<p><a href="cookiebeleid.html">Lees het cookiebeleid</a>.</p>',
+      '<h2>Cookies</h2>',
+      '<p>We onthouden je keuze. Met toestemming gebruiken we bezoekersstatistieken.</p>',
+      '<p><a href="cookiebeleid.html">Meer over cookies</a>.</p>',
       '<div class="cookie-consent__actions">',
-      '<button class="cookie-consent__button" type="button" data-cookie-action="necessary">Alleen noodzakelijke</button>',
+      '<button class="cookie-consent__button" type="button" data-cookie-action="necessary">Alleen noodzakelijk</button>',
       '<button class="cookie-consent__button" type="button" data-cookie-action="accept">Statistieken toestaan</button>',
       '</div>',
-      '<button class="cookie-consent__link-button" type="button" data-cookie-action="preferences">Cookie-instellingen</button>',
+      '<button class="cookie-consent__link-button" type="button" data-cookie-action="preferences">Instellingen</button>',
       '</section>',
       '<div class="cookie-consent__backdrop" hidden>',
       '<section class="cookie-consent__dialog" role="dialog" aria-modal="true" aria-labelledby="cookie-settings-title">',
       '<h2 id="cookie-settings-title">Cookie-instellingen</h2>',
-      '<p>Kies welke niet-noodzakelijke opslag je wilt toestaan. Je kunt deze keuze later altijd aanpassen.</p>',
+      '<p>Je kunt deze keuze later altijd aanpassen.</p>',
       '<label class="cookie-consent__choice cookie-consent__choice--required">',
       '<input type="checkbox" checked disabled>',
-      '<span><strong>Noodzakelijk</strong><span>Onmisbaar om je cookiekeuze te onthouden.</span></span>',
+      '<span><strong>Noodzakelijk</strong><span>Onthoudt je keuze.</span></span>',
       '</label>',
       '<label class="cookie-consent__choice">',
       '<input id="cookie-analytics" type="checkbox">',
-      '<span><strong>Bezoekersstatistieken</strong><span>Helpt Normly te begrijpen welke pagina’s goed worden gevonden en gebruikt.</span></span>',
+      '<span><strong>Bezoekersstatistieken</strong><span>Helpt ons de website verbeteren.</span></span>',
       '</label>',
       '<div class="cookie-consent__actions">',
-      '<button class="cookie-consent__button" type="button" data-cookie-action="save">Keuze opslaan</button>',
-      '<button class="cookie-consent__button" type="button" data-cookie-action="necessary">Alleen noodzakelijke</button>',
+      '<button class="cookie-consent__button" type="button" data-cookie-action="save">Opslaan</button>',
+      '<button class="cookie-consent__button" type="button" data-cookie-action="necessary">Alleen noodzakelijk</button>',
       '</div>',
-      '<button class="cookie-consent__link-button" type="button" data-cookie-action="close">Annuleren</button>',
+      '<button class="cookie-consent__link-button" type="button" data-cookie-action="close">Terug</button>',
       '</section>',
-      '</div>'
+      '</div>',
+      '<p class="cookie-consent__feedback" role="status" aria-live="polite" hidden></p>'
     ].join("");
 
     document.body.appendChild(root);
