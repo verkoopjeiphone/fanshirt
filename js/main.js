@@ -1,49 +1,35 @@
-// Normly – gedeeld script
-// Mobiele navigatie + lichte fade-in-animatie bij scrollen.
+// Verstandel – menu op mobiel en voorselectie van het onderwerp in het contactformulier
+(function () {
+  document.documentElement.classList.add("js");
 
-document.addEventListener("DOMContentLoaded", function () {
-  var toggle = document.querySelector(".nav-toggle");
-  var nav = document.getElementById("main-nav");
-
+  var toggle = document.querySelector(".menu-toggle");
+  var nav = document.getElementById("site-nav");
   if (toggle && nav) {
     toggle.addEventListener("click", function () {
-      var isOpen = nav.classList.toggle("is-open");
-      toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      toggle.setAttribute("aria-label", isOpen ? "Menu sluiten" : "Menu openen");
+      var open = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!open));
+      nav.classList.toggle("is-open", !open);
     });
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && nav.classList.contains("is-open")) {
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && nav.classList.contains("is-open")) {
         nav.classList.remove("is-open");
         toggle.setAttribute("aria-expanded", "false");
-        toggle.setAttribute("aria-label", "Menu openen");
         toggle.focus();
       }
     });
   }
 
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var revealEls = document.querySelectorAll(".reveal");
-
-  if (reduceMotion || !("IntersectionObserver" in window) || !revealEls.length) {
-    revealEls.forEach(function (el) {
-      el.classList.add("is-visible");
-    });
-    return;
-  }
-
-  var observer = new IntersectionObserver(
-    function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
+  var select = document.getElementById("onderwerp");
+  if (select) {
+    var params = new URLSearchParams(window.location.search);
+    var keuze = params.get("onderwerp");
+    if (keuze) {
+      for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === keuze) {
+          select.selectedIndex = i;
+          break;
         }
-      });
-    },
-    { threshold: 0, rootMargin: "0px 0px -40px 0px" }
-  );
-
-  revealEls.forEach(function (el) {
-    observer.observe(el);
-  });
-});
+      }
+    }
+  }
+})();
