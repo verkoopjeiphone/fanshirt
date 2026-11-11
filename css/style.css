@@ -586,3 +586,43 @@ a:hover { color: var(--accent-hover); text-decoration-thickness: 2px; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* Illustraties */
+
+.illu { display: block; width: 100%; height: auto; }
+.hero-grid { display: grid; gap: clamp(2rem, 5vw, 3.5rem); align-items: center; }
+@media (min-width: 900px) { .hero-grid { grid-template-columns: 1.05fr 1fr; } }
+.hero-illu { max-width: 34rem; margin: 0 auto; }
+@media (max-width: 899px) { .hero-illu { max-width: 26rem; } }
+
+.card-illu {
+  margin: calc(-1 * clamp(1.5rem, 3vw, 2rem)) calc(-1 * clamp(1.5rem, 3vw, 2rem)) 1.25rem;
+  width: calc(100% + 2 * clamp(1.5rem, 3vw, 2rem));
+  max-width: none;
+  background: var(--surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 0 0;
+}
+
+.figure-row { margin-top: clamp(2rem, 4vw, 3rem); }
+.fig { margin: 0; }
+.fig .illu { border-radius: var(--radius); }
+.fig figcaption { margin-top: 0.85rem; font-size: 0.97rem; color: var(--muted); max-width: 46ch; }
+.fig figcaption strong { color: var(--text); }
+.fig-inline {
+  margin: 1.75rem 0 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.section-white .fig-inline { background: var(--bg); }
+
+.term-illu { max-width: 13rem; margin-bottom: 1rem; }
+
+.timeline-wrap { margin-bottom: clamp(1.5rem, 4vw, 2.5rem); }
+@media (max-width: 719px) { .timeline-wrap { display: none; } }
+
+.steps .icon { margin-bottom: 0.9rem; }
+.map-panel { padding: 1rem; }
